@@ -105,28 +105,8 @@ body {
   margin-top: 4px;
 }
 .btn-login:hover { background: #2e6da4; }
-.btn-daftar {
-  width: 100%;
-  padding: 11px;
-  background: transparent;
-  color: #1a3a6b;
-  border: 1.5px solid #1a3a6b;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 8px;
-  transition: all 0.2s;
-}
-.btn-daftar:hover { background: #f0f7ff; }
 .login-error {
   color: #e74c3c;
-  font-size: 13px;
-  margin-top: 10px;
-  display: none;
-}
-.login-success {
-  color: #27ae60;
   font-size: 13px;
   margin-top: 10px;
   display: none;
@@ -140,45 +120,6 @@ body {
   color: #555;
   text-align: left;
   line-height: 1.8;
-}
-.daftar-form { display: none; }
-.link-kecil {
-  font-size: 12px;
-  color: #1a3a6b;
-  cursor: pointer;
-  text-decoration: underline;
-  margin-top: 10px;
-  display: inline-block;
-}
-.badge-pending {
-  display: inline-block;
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffc107;
-  border-radius: 12px;
-  padding: 2px 10px;
-  font-size: 12px;
-  font-weight: bold;
-}
-.badge-lulus {
-  display: inline-block;
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #28a745;
-  border-radius: 12px;
-  padding: 2px 10px;
-  font-size: 12px;
-  font-weight: bold;
-}
-.badge-tolak {
-  display: inline-block;
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #dc3545;
-  border-radius: 12px;
-  padding: 2px 10px;
-  font-size: 12px;
-  font-weight: bold;
 }
 
 /* ══ MAIN APP ══ */
@@ -459,34 +400,12 @@ td.noday { background: #f5f5f5; }
     </div>
     <button class="btn-login" onclick="doLogin()">Log Masuk</button>
     <div class="login-error" id="login-error">⚠️ ID atau kata laluan tidak sah.</div>
-    <div class="login-success" id="login-success"></div>
 
-    <!-- Borang Daftar Akaun -->
-    <div class="daftar-form" id="daftar-form">
-      <hr style="margin:16px 0; border-color:#eee;">
-      <h3 style="font-size:15px; margin-bottom:12px; color:#1a3a6b;">📝 Daftar Akaun Baharu</h3>
-      <div class="form-field">
-        <label>Nama Penuh</label>
-        <input type="text" id="daftar-nama" placeholder="Cth: Ahmad bin Ali">
-      </div>
-      <div class="form-field">
-        <label>ID Pengguna</label>
-        <input type="text" id="daftar-id" placeholder="Cth: pelajar03 (tanpa ruang)">
-      </div>
-      <div class="form-field">
-        <label>Kata Laluan</label>
-        <input type="password" id="daftar-pass" placeholder="Kata laluan anda">
-      </div>
-      <button class="btn-login" style="margin-top:4px;" onclick="doDaftar()">Hantar Permohonan</button>
-      <div style="text-align:center; margin-top:8px;">
-        <span class="link-kecil" onclick="toggleDaftar(false)">← Kembali ke Log Masuk</span>
-      </div>
+    <div class="demo-info">
+      <strong>🔑 Akaun Demo:</strong><br>
+      👨‍🏫 Pensyarah → ID: <b>pensyarah01</b> &nbsp;|&nbsp; Kata Laluan: <b>abc123</b><br>
+      🎓 Pelajar &nbsp;&nbsp;&nbsp;→ ID: <b>pelajar01</b> &nbsp;&nbsp;&nbsp;|&nbsp; Kata Laluan: <b>abc123</b>
     </div>
-
-    <div id="pautan-daftar" style="text-align:center; margin-top:12px;">
-      <span class="link-kecil" onclick="toggleDaftar(true)">Belum ada akaun? Daftar di sini</span>
-    </div>
-
   </div>
 </div>
 
@@ -512,15 +431,6 @@ td.noday { background: #f5f5f5; }
 
     <!-- ══ PENSYARAH VIEW ══ -->
     <div id="view-pensyarah" style="display:none;">
-
-      <!-- Panel Kelulusan Akaun -->
-      <div class="section-card" id="panel-kelulusan" style="display:none;">
-        <h2>🔐 Kelulusan Akaun Baharu</h2>
-        <p style="font-size:13px; color:#888; margin-bottom:14px;">Senarai permohonan akaun yang menunggu kelulusan anda.</p>
-        <div id="senarai-pending">
-          <p style="color:#888; text-align:center; padding:20px;">Tiada permohonan baharu.</p>
-        </div>
-      </div>
 
       <!-- Dashboard Stats -->
       <div class="dash-cards">
@@ -784,7 +694,7 @@ td.noday { background: #f5f5f5; }
 // ══════════════════════════════════════════════════
 // TETAPAN — Masukkan URL Web App Google Apps Script
 // ══════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbxrQk1UKpQ6SiVfKD9w08b5HmN24aBQ7zC5y5JyyWm5kWHuSagIwHWLq-0CI3Necsi1mQ/exec';
+const API_URL = 'https://docs.google.com/spreadsheets/d/12SFZqhjSPZuDNgPBGhSdZa5sFRwE7U__oflJ81iSW8Q/edit?gid=0#gid=0';
 // Contoh: 'https://script.google.com/macros/s/AKfycb.../exec'
 
 let currentRole = 'pensyarah';
@@ -831,7 +741,7 @@ async function doLogin() {
       document.getElementById('topbar-sub').textContent = currentRole === 'pensyarah' ? 'Panel Pensyarah Pembimbing' : 'Portal Pelajar';
       document.getElementById('view-pensyarah').style.display = currentRole === 'pensyarah' ? 'block' : 'none';
       document.getElementById('view-pelajar').style.display   = currentRole === 'pelajar'   ? 'block' : 'none';
-      if (currentRole === 'pensyarah') { loadRekodPensyarah(); loadPendingPengguna(); }
+      if (currentRole === 'pensyarah') loadRekodPensyarah();
       if (currentRole === 'pelajar')   loadRekodPelajar();
     } else {
       err.textContent = result.peranan && result.peranan !== currentRole
@@ -845,101 +755,6 @@ async function doLogin() {
   }
   btn.textContent = 'Log Masuk';
   btn.disabled = false;
-}
-
-// ══════════════════════════
-// DAFTAR AKAUN
-// ══════════════════════════
-function toggleDaftar(tunjuk) {
-  document.getElementById('daftar-form').style.display   = tunjuk ? 'block' : 'none';
-  document.getElementById('pautan-daftar').style.display = tunjuk ? 'none'  : 'block';
-  const loginFields = document.querySelectorAll('#login-user, #login-pass, .btn-login, #lbl-user, label[for="lbl-user"]');
-  document.getElementById('login-user').closest('.form-field').style.display = tunjuk ? 'none' : 'block';
-  document.getElementById('login-pass').closest('.form-field').style.display = tunjuk ? 'none' : 'block';
-  document.querySelector('.btn-login').style.display = tunjuk ? 'none' : 'block';
-  document.getElementById('login-error').style.display  = 'none';
-  document.getElementById('login-success').style.display = 'none';
-}
-
-async function doDaftar() {
-  const nama  = document.getElementById('daftar-nama').value.trim();
-  const id    = document.getElementById('daftar-id').value.trim().toLowerCase().replace(/\s/g,'');
-  const pass  = document.getElementById('daftar-pass').value;
-  const err   = document.getElementById('login-error');
-  const suc   = document.getElementById('login-success');
-
-  if (!nama || !id || !pass) {
-    err.textContent = '⚠️ Sila isi semua maklumat.';
-    err.style.display = 'block'; suc.style.display = 'none'; return;
-  }
-  if (pass.length < 4) {
-    err.textContent = '⚠️ Kata laluan mestilah sekurang-kurangnya 4 aksara.';
-    err.style.display = 'block'; suc.style.display = 'none'; return;
-  }
-
-  const btn = document.querySelector('#daftar-form .btn-login');
-  btn.textContent = 'Menghantar...'; btn.disabled = true;
-
-  try {
-    const result = await apiCall({ action: 'daftarAkaun', id: id, kataLaluan: pass, peranan: currentRole, nama: nama });
-    if (result.status === 'ok') {
-      suc.textContent = '✅ ' + result.mesej;
-      suc.style.display = 'block';
-      err.style.display = 'none';
-      document.getElementById('daftar-nama').value = '';
-      document.getElementById('daftar-id').value   = '';
-      document.getElementById('daftar-pass').value = '';
-    } else {
-      err.textContent = '⚠️ ' + result.mesej;
-      err.style.display = 'block'; suc.style.display = 'none';
-    }
-  } catch(e) {
-    err.textContent = '⚠️ Gagal sambung ke pelayan.';
-    err.style.display = 'block';
-  }
-  btn.textContent = 'Hantar Permohonan'; btn.disabled = false;
-}
-
-// ══════════════════════════
-// KELULUSAN PENGGUNA
-// ══════════════════════════
-async function loadPendingPengguna() {
-  try {
-    const result = await apiCall({ action: 'getPendingPengguna' });
-    const panel  = document.getElementById('panel-kelulusan');
-    const div    = document.getElementById('senarai-pending');
-    if (result.status === 'ok' && result.senarai.length > 0) {
-      panel.style.display = 'block';
-      div.innerHTML = result.senarai.map(p => `
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f0f0;">
-          <div>
-            <strong>${p.nama}</strong> &nbsp;
-            <span class="badge-pending">${p.peranan}</span><br>
-            <small style="color:#888;">ID: ${p.id}</small>
-          </div>
-          <div style="display:flex; gap:8px;">
-            <button class="btn btn-green" onclick="luluskanPengguna('${p.id}')">✅ Lulus</button>
-            <button class="btn btn-red"   onclick="tolakPengguna('${p.id}')">❌ Tolak</button>
-          </div>
-        </div>`).join('');
-    } else {
-      panel.style.display = 'none';
-    }
-  } catch(e) {}
-}
-
-async function luluskanPengguna(id) {
-  if (!confirm('Luluskan akaun ' + id + '?')) return;
-  const result = await apiCall({ action: 'luluskanPengguna', id: id });
-  alert(result.mesej);
-  loadPendingPengguna();
-}
-
-async function tolakPengguna(id) {
-  if (!confirm('Tolak permohonan akaun ' + id + '?')) return;
-  const result = await apiCall({ action: 'tolakPengguna', id: id });
-  alert(result.mesej);
-  loadPendingPengguna();
 }
 
 function doLogout() {
