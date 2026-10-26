@@ -1,0 +1,2457 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eLog Perjumpaan Pelajar</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #e8edf5;
+  min-height: 100vh;
+  color: #1a1a2e;
+}
+
+/* ══ LOGIN SCREEN ══ */
+#login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a3a6b 0%, #2e6da4 50%, #1a8fc1 100%);
+  padding: 20px;
+}
+.login-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  text-align: center;
+}
+.login-logo {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+.login-card h1 {
+  font-size: 20px;
+  color: #1a3a6b;
+  margin-bottom: 4px;
+}
+.login-card p {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 28px;
+}
+.role-tabs {
+  display: flex;
+  border: 2px solid #1a3a6b;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.role-tab {
+  flex: 1;
+  padding: 10px;
+  background: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  color: #1a3a6b;
+  transition: all 0.2s;
+}
+.role-tab.active {
+  background: #1a3a6b;
+  color: white;
+}
+.form-field {
+  margin-bottom: 16px;
+  text-align: left;
+}
+.form-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: bold;
+  color: #444;
+  margin-bottom: 6px;
+}
+.form-field input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border 0.2s;
+}
+.form-field input:focus {
+  border-color: #1a3a6b;
+  outline: none;
+}
+.btn-login {
+  width: 100%;
+  padding: 13px;
+  background: #1a3a6b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 4px;
+}
+.btn-login:hover { background: #2e6da4; }
+.btn-daftar {
+  width: 100%;
+  padding: 11px;
+  background: transparent;
+  color: #1a3a6b;
+  border: 1.5px solid #1a3a6b;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+.btn-daftar:hover { background: #f0f7ff; }
+.login-error {
+  color: #e74c3c;
+  font-size: 13px;
+  margin-top: 10px;
+  display: none;
+}
+.login-success {
+  color: #27ae60;
+  font-size: 13px;
+  margin-top: 10px;
+  display: none;
+}
+.demo-info {
+  margin-top: 20px;
+  padding: 12px;
+  background: #f0f7ff;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #555;
+  text-align: left;
+  line-height: 1.8;
+}
+.daftar-form { display: none; }
+.link-kecil {
+  font-size: 12px;
+  color: #1a3a6b;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-top: 10px;
+  display: inline-block;
+}
+.badge-pending {
+  display: inline-block;
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: bold;
+}
+.badge-lulus {
+  display: inline-block;
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #28a745;
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: bold;
+}
+.badge-tolak {
+  display: inline-block;
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #dc3545;
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* ══ MAIN APP ══ */
+#app-screen { display: none; }
+
+.topbar {
+  background: linear-gradient(135deg, #1a3a6b, #2e6da4);
+  color: white;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+.topbar-left h1 { font-size: 17px; }
+.topbar-left p  { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.user-badge {
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: bold;
+}
+.btn-logout {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+.btn-logout:hover { background: rgba(255,255,255,0.3); }
+
+/* ══ CONTENT ══ */
+.content { max-width: 900px; margin: 24px auto; padding: 0 20px 40px; }
+
+/* ══ DASHBOARD PENSYARAH ══ */
+.dash-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.dash-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  border-top: 4px solid #2e6da4;
+}
+.dash-card .num { font-size: 32px; font-weight: bold; color: #1a3a6b; }
+.dash-card .lbl { font-size: 13px; color: #888; margin-top: 4px; }
+
+.section-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+}
+.section-card h2 {
+  font-size: 16px;
+  color: #1a3a6b;
+  border-bottom: 2px solid #e8eaf0;
+  padding-bottom: 10px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ══ FORM FIELDS ══ */
+.field-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.field-group.single { grid-template-columns: 1fr; }
+.field-group.triple { grid-template-columns: 1fr 1fr 1fr; }
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.field label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.field input, .field select, .field textarea {
+  padding: 9px 12px;
+  border: 1.5px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border 0.2s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: #2e6da4;
+  outline: none;
+}
+.field textarea { resize: vertical; min-height: 80px; }
+
+/* ══ TABLES ══ */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.data-table th {
+  background: #1a3a6b;
+  color: white;
+  padding: 10px 12px;
+  text-align: left;
+}
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: top;
+}
+.data-table tr:hover td { background: #f7f9ff; }
+.badge-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+}
+.badge-pending  { background: #fff3cd; color: #856404; }
+.badge-approved { background: #d1fae5; color: #065f46; }
+
+/* ══ GANTT ══ */
+.gantt-table { font-size: 12px; }
+.gantt-table th { padding: 7px 4px; text-align: center; font-size: 11px; }
+.gantt-table td { padding: 7px 4px; text-align: center; }
+.gantt-table td.act-lbl { text-align: left; font-size: 12px; padding-left: 8px; width: 28%; }
+.gantt-table td input[type="checkbox"] { cursor: pointer; }
+
+/* ══ CALENDAR ══ */
+.cal-table { font-size: 11px; }
+.cal-table th { padding: 6px 3px; text-align: center; }
+.cal-table td { padding: 4px 2px; text-align: center; min-width: 20px; }
+.cal-table td.bulan { font-weight: bold; color: #1a3a6b; background: #f7f9fc; text-align: left; padding-left: 6px; }
+.day-cell { cursor: pointer; border-radius: 3px; transition: background 0.15s; user-select: none; }
+.day-cell:hover { background: #d0e8ff; }
+.day-cell.marked { background: #1a3a6b; color: white; font-weight: bold; border-radius: 3px; }
+.day-cell.marked-auto { background: #27ae60; color: white; font-weight: bold; border-radius: 3px; }
+td.noday { background: #f5f5f5; }
+
+/* ══ LIKERT ══ */
+.likert-table th { text-align: center; padding: 8px 6px; font-size: 13px; }
+.likert-table td { padding: 9px 10px; font-size: 13px; }
+.likert-table td.ctr { text-align: center; }
+.likert-table input[type="radio"] { cursor: pointer; transform: scale(1.2); }
+
+/* ══ PHOTO ══ */
+.photo-upload {
+  border: 2px dashed #2e6da4;
+  border-radius: 8px;
+  width: 120px; height: 150px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  cursor: pointer; font-size: 12px; color: #2e6da4;
+  text-align: center; overflow: hidden;
+  background: #f0f7ff; flex-shrink: 0;
+}
+.photo-upload img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ══ SIGN ══ */
+.sign-row { display: flex; gap: 30px; margin-top: 20px; }
+.sign-box {
+  flex: 1; border-top: 2px solid #1a3a6b;
+  padding-top: 8px; font-size: 13px; color: #555;
+}
+
+/* ══ PERTEMUAN BLOCK ══ */
+.pt-block {
+  border: 1.5px solid #1a3a6b;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.pt-title {
+  background: #1a3a6b;
+  color: white;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* ══ BUTANG ══ */
+.btn-row {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-top: 20px;
+}
+.btn {
+  padding: 10px 20px; border: none; border-radius: 6px;
+  font-size: 13px; font-weight: bold; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.85; }
+.btn-blue   { background: #1a3a6b; color: white; }
+.btn-green  { background: #27ae60; color: white; }
+.btn-red    { background: #e74c3c; color: white; }
+.btn-orange { background: #e67e22; color: white; }
+.btn-grey   { background: #7f8c8d; color: white; }
+
+/* ══ TABS ══ */
+.tab-bar {
+  display: flex; gap: 0;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+.tab-btn {
+  padding: 10px 20px;
+  border: none; background: none;
+  font-size: 14px; font-weight: bold;
+  color: #888; cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+.tab-btn.active { color: #1a3a6b; border-bottom-color: #1a3a6b; }
+
+/* ══ ROLE LABEL ══ */
+.role-pensyarah { display: none; }
+.role-pelajar   { display: none; }
+
+@media print {
+  .topbar, .btn-row, .btn-logout, #login-screen { display: none !important; }
+  body { background: white; }
+  .section-card { box-shadow: none; }
+}
+@media (max-width: 600px) {
+  .dash-cards { grid-template-columns: 1fr 1fr; }
+  .field-group { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">📚</div>
+    <h1>eLog Perjumpaan Pelajar</h1>
+    <p>Sistem Rekod Digital Bimbingan Pelajar</p>
+
+    <div class="role-tabs">
+      <button class="role-tab active" id="tab-pensyarah" onclick="switchRole('pensyarah')">👨‍🏫 Pensyarah</button>
+      <button class="role-tab" id="tab-pelajar" onclick="switchRole('pelajar')">🎓 Pelajar</button>
+    </div>
+
+    <div class="form-field">
+      <label id="lbl-user">ID Pensyarah</label>
+      <input type="text" id="login-user" placeholder="Masukkan ID anda">
+    </div>
+    <div class="form-field">
+      <label>Kata Laluan</label>
+      <input type="password" id="login-pass" placeholder="Masukkan kata laluan" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Log Masuk</button>
+    <div class="login-error" id="login-error">⚠️ ID atau kata laluan tidak sah.</div>
+    <div class="login-success" id="login-success"></div>
+
+    <!-- Borang Daftar Akaun -->
+    <div class="daftar-form" id="daftar-form">
+      <hr style="margin:16px 0; border-color:#eee;">
+      <h3 style="font-size:15px; margin-bottom:12px; color:#1a3a6b;">📝 Daftar Akaun Baharu</h3>
+      <div class="form-field">
+        <label>Nama Penuh</label>
+        <input type="text" id="daftar-nama" placeholder="Cth: Ahmad bin Ali">
+      </div>
+      <div class="form-field">
+        <label>ID Pengguna</label>
+        <input type="text" id="daftar-id" placeholder="Cth: pelajar03 (tanpa ruang)">
+      </div>
+      <div class="form-field">
+        <label>Kata Laluan</label>
+        <input type="password" id="daftar-pass" placeholder="Kata laluan anda">
+      </div>
+      <button class="btn-login" style="margin-top:4px;" onclick="doDaftar()">Hantar Permohonan</button>
+      <div style="text-align:center; margin-top:8px;">
+        <span class="link-kecil" onclick="toggleDaftar(false)">← Kembali ke Log Masuk</span>
+      </div>
+    </div>
+
+    <div id="pautan-daftar" style="text-align:center; margin-top:12px;">
+      <span class="link-kecil" onclick="toggleDaftar(true)">Belum ada akaun? Daftar di sini</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     MAIN APP
+═══════════════════════════════════ -->
+<div id="app-screen">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>📚 eLog Perjumpaan Pelajar</h1>
+      <p id="topbar-sub">Sistem Rekod Digital</p>
+    </div>
+    <div class="topbar-right">
+      <span class="user-badge" id="user-badge">-</span>
+      <button class="btn-logout" onclick="doLogout()">Log Keluar</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══ PENSYARAH VIEW ══ -->
+    <div id="view-pensyarah" style="display:none;">
+
+      <!-- Panel Kelulusan Akaun -->
+      <div class="section-card" id="panel-kelulusan" style="display:none;">
+        <h2>🔐 Kelulusan Akaun Baharu</h2>
+        <p style="font-size:13px; color:#888; margin-bottom:14px;">Senarai permohonan akaun yang menunggu kelulusan anda.</p>
+        <div id="senarai-pending">
+          <p style="color:#888; text-align:center; padding:20px;">Tiada permohonan baharu.</p>
+        </div>
+      </div>
+
+      <!-- Dashboard Stats -->
+      <div class="dash-cards">
+        <div class="dash-card">
+          <div class="num" id="stat-total">0</div>
+          <div class="lbl">Jumlah Rekod</div>
+        </div>
+        <div class="dash-card" style="border-top-color:#27ae60;">
+          <div class="num" id="stat-approved" style="color:#27ae60;">0</div>
+          <div class="lbl">Disahkan</div>
+        </div>
+        <div class="dash-card" style="border-top-color:#e67e22;">
+          <div class="num" id="stat-pending" style="color:#e67e22;">0</div>
+          <div class="lbl">Menunggu Pengesahan</div>
+        </div>
+        <div class="dash-card" style="border-top-color:#9b59b6;">
+          <div class="num" id="stat-kejayaan" style="color:#9b59b6; font-size:14px; line-height:1.4;">-</div>
+          <div class="lbl">🏆 Kejayaan Terkini</div>
+        </div>
+        <div class="dash-card" style="border-top-color:#1abc9c;">
+          <div style="margin-bottom:6px;">
+            <span style="font-size:28px; font-weight:bold; color:#1abc9c;" id="stat-peratus">0%</span>
+          </div>
+          <div style="background:#e8f8f5; border-radius:6px; height:10px; overflow:hidden; margin-bottom:6px;">
+            <div id="bar-peratus" style="height:10px; background:#1abc9c; width:0%; border-radius:6px; transition:width 0.5s;"></div>
+          </div>
+          <div class="lbl">📈 Pencapaian Program</div>
+        </div>
+      </div>
+
+      <!-- Senarai Rekod -->
+      <div class="section-card">
+        <h2>📋 Senarai Log Perjumpaan</h2>
+        <div id="rekod-list-pensyarah">
+          <p style="color:#888; text-align:center; padding:30px;">Tiada rekod lagi.</p>
+        </div>
+      </div>
+
+      <!-- Analisis Maklumbalas -->
+      <div class="section-card" id="panel-analisis" style="display:none;">
+        <h2>📊 Analisis Maklumbalas Pelajar</h2>
+        <div class="field-group single" style="margin-bottom:16px;">
+          <div class="field">
+            <label>Pilih Aktiviti untuk Analisis</label>
+            <select id="pilih_aktiviti_analisis" onchange="loadAnalisisMaklumbalas()">
+              <option value="">-- Pilih aktiviti --</option>
+            </select>
+          </div>
+        </div>
+        <div id="hasil-analisis">
+          <p style="color:#888;text-align:center;padding:20px;">Pilih aktiviti untuk lihat analisis penilaian pelajar.</p>
+        </div>
+      </div>
+
+      <!-- Impak Bimbingan — Pensyarah -->
+      <div class="section-card">
+        <h2>🎯 Impak Bimbingan</h2>
+        <p style="font-size:13px;color:#888;margin-bottom:14px;">Diisi oleh pensyarah setelah program / sesi perjumpaan tamat.</p>
+        <div class="field-group">
+          <div class="field">
+            <label>Nama Pertandingan</label>
+            <input type="text" id="nama_pertandingan" placeholder="Nama pertandingan yang disertai">
+          </div>
+          <div class="field">
+            <label>Tarikh Pertandingan</label>
+            <input type="date" id="tarikh_pertandingan">
+          </div>
+        </div>
+        <div class="field-group single">
+          <div class="field">
+            <label>Bukti Pencapaian / Kejayaan</label>
+            <textarea id="kejayaan" placeholder="Nyatakan pencapaian / anugerah yang diterima..."></textarea>
+          </div>
+        </div>
+        <div class="field">
+          <label>Gambar Kejayaan</label>
+          <div class="photo-upload" style="width:100%;height:130px;flex-direction:row;gap:8px;" onclick="document.getElementById('foto_kejayaan').click()">
+            <input type="file" id="foto_kejayaan" accept="image/*" style="display:none" onchange="previewPhoto(this,'kejayaan_prev')">
+            <span id="kejayaan_prev">📷 Klik untuk muat naik gambar kejayaan</span>
+          </div>
+        </div>
+        <div class="sign-row">
+          <div class="sign-box">
+            Disahkan oleh:<br><br><br>
+            ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br>
+            <strong>Pensyarah Pembimbing</strong>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-green" onclick="simpanImpak()">💾 Simpan Impak Bimbingan</button>
+        </div>
+      </div>
+
+      <!-- Carta Perbatuan — Pensyarah -->
+      <div class="section-card">
+        <h2>📊 Carta Perbatuan</h2>
+        <div style="overflow-x:auto;">
+          <table class="data-table gantt-table" id="gantt_tbl">
+            <thead>
+              <tr>
+                <th style="text-align:left; width:5%;">Bil</th>
+                <th style="text-align:left; width:25%;">Aktiviti</th>
+                <th style="width:12%;">Tarikh Perancangan</th>
+                <th>Jan</th><th>Feb</th><th>Mac</th><th>Apr</th>
+                <th>Mei</th><th>Jun</th><th>Jul</th><th>Ogos</th>
+                <th>Sep</th><th>Okt</th><th>Nov</th><th>Dis</th>
+              </tr>
+            </thead>
+            <tbody id="gantt_body"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-blue"  onclick="tambahAktiviti()">＋ Tambah Aktiviti</button>
+          <button class="btn btn-green" onclick="simpanGantt()">💾 Simpan Carta</button>
+          <button class="btn btn-grey"  style="font-size:12px;" onclick="buangAktiviti()">✕ Buang Baris Terakhir</button>
+        </div>
+      </div>
+
+      <!-- Rekod Pertemuan Kalendar — Pensyarah -->
+      <div class="section-card">
+        <h2>🗓️ Rekod Pertemuan — Kalendar</h2>
+        <div style="overflow-x:auto;">
+          <table class="data-table cal-table">
+            <thead>
+              <tr>
+                <th style="text-align:left;">Bulan</th>
+                <th colspan="31">Tarikh Pertemuan (Klik untuk tandakan)</th>
+              </tr>
+            </thead>
+            <tbody id="cal_body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Butang Export — bawah sekali -->
+      <div class="btn-row" style="margin-top:10px; margin-bottom:30px;">
+        <button class="btn btn-red"    onclick="window.print()">🖨️ Export PDF</button>
+        <button class="btn btn-orange" onclick="exportWordPensyarah()">📄 Export Word</button>
+      </div>
+
+    </div>
+
+    <!-- ══ PELAJAR VIEW ══ -->
+    <div id="view-pelajar" style="display:none;">
+
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tabBtn-profil"    onclick="showTab('tab-profil')">👤 Profil</button>
+        <button class="tab-btn"        id="tabBtn-aktiviti"  onclick="showTab('tab-aktiviti')">➕ Aktiviti</button>
+        <button class="tab-btn"        id="tabBtn-pertemuan" onclick="showTab('tab-pertemuan')">📝 Rekod Pertemuan</button>
+      </div>
+
+      <!-- TAB: PROFIL -->
+      <div id="tab-profil">
+        <div class="section-card">
+          <h2>👤 Profil Saya</h2>
+          <p style="font-size:13px;color:#888;margin-bottom:16px;">Maklumat ini disimpan dan auto-isi setiap kali anda log masuk. Boleh dikemaskini bila-bila masa.</p>
+          <div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">
+            <div style="flex:1; min-width:220px;">
+              <div class="field-group single">
+                <div class="field">
+                  <label>Nama Penuh Pelajar</label>
+                  <input type="text" id="profil_nama" placeholder="Nama penuh pelajar">
+                </div>
+              </div>
+              <div class="field-group">
+                <div class="field">
+                  <label>No. Pendaftaran / Matrik</label>
+                  <input type="text" id="profil_matrik" placeholder="Contoh: PKB24001">
+                </div>
+                <div class="field">
+                  <label>Program</label>
+                  <input type="text" id="profil_program" placeholder="Contoh: Diploma Perakaunan">
+                </div>
+              </div>
+              <div class="field-group single">
+                <div class="field">
+                  <label>Nama Pensyarah Pembimbing</label>
+                  <input type="text" id="profil_pensyarah" placeholder="Nama penuh pensyarah">
+                </div>
+              </div>
+              <div class="field-group">
+                <div class="field">
+                  <label>Tahun</label>
+                  <input type="text" id="profil_tahun" placeholder="Contoh: 2025">
+                </div>
+                <div class="field">
+                  <label>Sesi Pengajian</label>
+                  <input type="text" id="profil_sesi" placeholder="Contoh: Jun 2025 – Nov 2025">
+                </div>
+              </div>
+            </div>
+            <div class="photo-upload" onclick="document.getElementById('foto_profil').click()" title="Klik untuk muat naik gambar">
+              <input type="file" id="foto_profil" accept="image/*" style="display:none" onchange="previewPhoto(this,'foto_profil_prev')">
+              <span id="foto_profil_prev">📷<br>Gambar<br>Pelajar</span>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-blue" onclick="simpanProfil()">💾 Simpan Profil</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: TAMBAH AKTIVITI -->
+      <div id="tab-aktiviti" style="display:none;">
+        <div class="section-card">
+          <h2>➕ Tambah Aktiviti Baharu</h2>
+          <p style="font-size:13px;color:#888;margin-bottom:16px;">Daftarkan aktiviti / program baharu yang dipantau oleh pensyarah pembimbing anda.</p>
+          <div class="field-group single">
+            <div class="field">
+              <label>Nama Program / Aktiviti</label>
+              <input type="text" id="aktiviti_nama" placeholder="Contoh: Mentor-Mentee, Kelab Robotik...">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-blue" onclick="simpanAktiviti()">💾 Simpan Aktiviti</button>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h2>📋 Senarai Aktiviti Saya</h2>
+          <div id="senarai-aktiviti-pelajar">
+            <p style="color:#888;text-align:center;padding:20px;">Tiada aktiviti lagi.</p>
+          </div>
+        </div>
+
+        <!-- Carta Perbatuan untuk Aktiviti -->
+        <div class="section-card" id="panel-carta-pelajar" style="display:none;">
+          <h2>📊 Carta Perbatuan — <span id="label-carta-aktiviti" style="color:#2e6da4;"></span></h2>
+          <p style="font-size:13px;color:#888;margin-bottom:14px;">Tandakan bulan pelaksanaan bagi setiap sub-aktiviti.</p>
+          <div style="overflow-x:auto;">
+            <table class="data-table gantt-table" id="gantt_tbl_pelajar">
+              <thead>
+                <tr>
+                  <th style="text-align:left; width:5%;">Bil</th>
+                  <th style="text-align:left; width:30%;">Sub-Aktiviti</th>
+                  <th style="width:12%;">Tarikh Perancangan</th>
+                  <th>Jan</th><th>Feb</th><th>Mac</th><th>Apr</th>
+                  <th>Mei</th><th>Jun</th><th>Jul</th><th>Ogos</th>
+                  <th>Sep</th><th>Okt</th><th>Nov</th><th>Dis</th>
+                </tr>
+              </thead>
+              <tbody id="gantt_body_pelajar"></tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-blue"  onclick="tambahAktivitiCarta()">＋ Tambah Baris</button>
+            <button class="btn btn-green" onclick="simpanCartaPelajar()">💾 Simpan Carta</button>
+            <button class="btn btn-red"   onclick="cetakCartaPelajar()">🖨️ Cetak / PDF</button>
+            <button class="btn btn-grey"  style="font-size:12px;" onclick="buangAktivitiCarta()">✕ Buang Baris Terakhir</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: REKOD PERTEMUAN -->
+      <div id="tab-pertemuan" style="display:none;">
+
+        <!-- Pilih Aktiviti -->
+        <div class="section-card">
+          <h2>📝 Rekod Pertemuan Baharu</h2>
+          <div class="field-group single">
+            <div class="field">
+              <label>Pilih Aktiviti</label>
+              <select id="pilih_aktiviti" onchange="loadRekodMengikutAktiviti()">
+                <option value="">-- Pilih aktiviti --</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rekod Pertemuan -->
+        <div class="section-card">
+          <h2>📅 Detail Pertemuan</h2>
+          <div id="pertemuan_list"></div>
+          <button class="btn btn-blue" style="margin-top:10px;" onclick="tambahPertemuan()">＋ Tambah Rekod Pertemuan</button>
+        </div>
+
+        <!-- Borang Maklumbalas -->
+        <div class="section-card">
+          <h2>⭐ Borang Maklumbalas Bimbingan</h2>
+          <p style="font-size:13px;color:#555;margin-bottom:14px;line-height:1.7;">
+            Borang maklumbalas ini untuk menilai keberkesanan pelaksanaan dan bimbingan program bagi aktiviti yang dipilih.<br>
+            <strong>Skala:</strong> 1 - Sangat Tidak Memuaskan &nbsp;|&nbsp; 2 - Tidak Memuaskan &nbsp;|&nbsp; 3 - Sederhana &nbsp;|&nbsp; 4 - Memuaskan &nbsp;|&nbsp; 5 - Sangat Memuaskan
+          </p>
+          <div style="overflow-x:auto;">
+            <table class="data-table likert-table">
+              <thead>
+                <tr>
+                  <th style="width:5%;">Bil</th>
+                  <th style="text-align:left;">Perkara</th>
+                  <th style="width:7%;">1</th><th style="width:7%;">2</th>
+                  <th style="width:7%;">3</th><th style="width:7%;">4</th><th style="width:7%;">5</th>
+                </tr>
+              </thead>
+              <tbody id="likert_body"></tbody>
+            </table>
+          </div>
+          <p style="font-size:11px;color:#aaa;margin-top:8px;">*Penilaian ini akan dihantar kepada pensyarah pembimbing untuk analisis</p>
+          <div class="btn-row" style="margin-top:14px;">
+            <button class="btn btn-green" onclick="hantarMaklumbalas()">📤 Hantar Penilaian</button>
+          </div>
+        </div>
+
+        <!-- Butang Simpan Rekod Pertemuan -->
+        <div class="btn-row">
+          <button class="btn btn-blue" onclick="simpanLog()">💾 Hantar Rekod Pertemuan</button>
+          <button class="btn btn-grey" onclick="resetFormPertemuan()">🔄 Set Semula</button>
+        </div>
+
+        <!-- Senarai Rekod Pertemuan mengikut Aktiviti -->
+        <div class="section-card" style="margin-top:20px;">
+          <h2>📋 Senarai Rekod Pertemuan Saya</h2>
+          <p style="font-size:13px;color:#888;margin-bottom:14px;">Rekod pertemuan yang telah dihantar mengikut aktiviti yang dipilih.</p>
+          <div id="rekod-list-pelajar">
+            <p style="color:#888;text-align:center;padding:20px;">Pilih aktiviti untuk lihat rekod pertemuan.</p>
+          </div>
+          <div class="btn-row" id="btn-cetak-pelajar" style="display:none;">
+            <button class="btn btn-red"    onclick="cetakRekodPelajar()">🖨️ Cetak / Export PDF</button>
+            <button class="btn btn-orange" onclick="exportWordPelajar()">📄 Export Word</button>
+          </div>
+        </div>
+
+      </div><!-- end tab-pertemuan -->
+
+    </div><!-- end view-pelajar -->
+
+  </div><!-- end content -->
+</div><!-- end app-screen -->
+
+<script>
+// ══════════════════════════════════════════════════
+// TETAPAN — Masukkan URL Web App Google Apps Script
+// ══════════════════════════════════════════════════
+const API_URL = 'https://script.google.com/macros/s/AKfycbz4bTut6YnB7WLtI0s0sQJ6ohN3RnBY5NMLy8orle1qTnbtx0azs3jM0MBSJOGvNk2Trg/exec';
+// Contoh: 'https://script.google.com/macros/s/AKfycb.../exec'
+
+let currentRole = 'pensyarah';
+let currentUser = '';
+let currentNama = '';
+
+function switchRole(role) {
+  currentRole = role;
+  document.getElementById('tab-pensyarah').classList.toggle('active', role === 'pensyarah');
+  document.getElementById('tab-pelajar').classList.toggle('active', role === 'pelajar');
+  document.getElementById('lbl-user').textContent = role === 'pensyarah' ? 'ID Pensyarah' : 'ID Pelajar';
+  document.getElementById('login-error').style.display = 'none';
+}
+
+// ── Hantar request ke Google Apps Script ──
+async function apiCall(payload) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+  return await res.json();
+}
+
+async function doLogin() {
+  const user = document.getElementById('login-user').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const err  = document.getElementById('login-error');
+  const btn  = document.querySelector('.btn-login');
+
+  if (!user || !pass) { err.textContent = '⚠️ Sila masukkan ID dan kata laluan.'; err.style.display = 'block'; return; }
+
+  btn.textContent = 'Sedang log masuk...';
+  btn.disabled = true;
+
+  try {
+    const result = await apiCall({ action: 'login', id: user, kataLaluan: pass, peranan: currentRole });
+    if (result.status === 'ok' && result.peranan === currentRole) {
+      currentUser = user;
+      currentNama = result.nama || user;
+      err.style.display = 'none';
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-screen').style.display = 'block';
+      document.getElementById('user-badge').textContent = (currentRole === 'pensyarah' ? '👨‍🏫 ' : '🎓 ') + currentNama;
+      document.getElementById('topbar-sub').textContent = currentRole === 'pensyarah' ? 'Panel Pensyarah Pembimbing' : 'Portal Pelajar';
+      document.getElementById('view-pensyarah').style.display = currentRole === 'pensyarah' ? 'block' : 'none';
+      document.getElementById('view-pelajar').style.display   = currentRole === 'pelajar'   ? 'block' : 'none';
+      if (currentRole === 'pensyarah') { loadRekodPensyarah(); loadPendingPengguna(); loadImpak(); loadGantt(); loadAktivitiUntukAnalisis(); }
+      if (currentRole === 'pelajar')   { loadProfilPelajar(); showTab('tab-profil'); }
+    } else {
+      err.textContent = result.peranan && result.peranan !== currentRole
+        ? '⚠️ Akaun ini bukan ' + currentRole + '. Sila pilih peranan yang betul.'
+        : '⚠️ ' + (result.mesej || 'ID atau kata laluan tidak sah.');
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = '⚠️ Gagal sambung ke pelayan. Semak URL API anda.';
+    err.style.display = 'block';
+  }
+  btn.textContent = 'Log Masuk';
+  btn.disabled = false;
+}
+
+// ══════════════════════════
+// DAFTAR AKAUN
+// ══════════════════════════
+function toggleDaftar(tunjuk) {
+  document.getElementById('daftar-form').style.display   = tunjuk ? 'block' : 'none';
+  document.getElementById('pautan-daftar').style.display = tunjuk ? 'none'  : 'block';
+  const loginFields = document.querySelectorAll('#login-user, #login-pass, .btn-login, #lbl-user, label[for="lbl-user"]');
+  document.getElementById('login-user').closest('.form-field').style.display = tunjuk ? 'none' : 'block';
+  document.getElementById('login-pass').closest('.form-field').style.display = tunjuk ? 'none' : 'block';
+  document.querySelector('.btn-login').style.display = tunjuk ? 'none' : 'block';
+  document.getElementById('login-error').style.display  = 'none';
+  document.getElementById('login-success').style.display = 'none';
+}
+
+async function doDaftar() {
+  const nama  = document.getElementById('daftar-nama').value.trim();
+  const id    = document.getElementById('daftar-id').value.trim().toLowerCase().replace(/\s/g,'');
+  const pass  = document.getElementById('daftar-pass').value;
+  const err   = document.getElementById('login-error');
+  const suc   = document.getElementById('login-success');
+
+  if (!nama || !id || !pass) {
+    err.textContent = '⚠️ Sila isi semua maklumat.';
+    err.style.display = 'block'; suc.style.display = 'none'; return;
+  }
+  if (pass.length < 4) {
+    err.textContent = '⚠️ Kata laluan mestilah sekurang-kurangnya 4 aksara.';
+    err.style.display = 'block'; suc.style.display = 'none'; return;
+  }
+
+  const btn = document.querySelector('#daftar-form .btn-login');
+  btn.textContent = 'Menghantar...'; btn.disabled = true;
+
+  try {
+    const result = await apiCall({ action: 'daftarAkaun', id: id, kataLaluan: pass, peranan: currentRole, nama: nama });
+    if (result.status === 'ok') {
+      suc.textContent = '✅ ' + result.mesej;
+      suc.style.display = 'block';
+      err.style.display = 'none';
+      document.getElementById('daftar-nama').value = '';
+      document.getElementById('daftar-id').value   = '';
+      document.getElementById('daftar-pass').value = '';
+    } else {
+      err.textContent = '⚠️ ' + result.mesej;
+      err.style.display = 'block'; suc.style.display = 'none';
+    }
+  } catch(e) {
+    err.textContent = '⚠️ Gagal sambung ke pelayan.';
+    err.style.display = 'block';
+  }
+  btn.textContent = 'Hantar Permohonan'; btn.disabled = false;
+}
+
+// ══════════════════════════
+// KELULUSAN PENGGUNA
+// ══════════════════════════
+async function loadPendingPengguna() {
+  try {
+    const result = await apiCall({ action: 'getPendingPengguna' });
+    const panel  = document.getElementById('panel-kelulusan');
+    const div    = document.getElementById('senarai-pending');
+    if (result.status === 'ok' && result.senarai.length > 0) {
+      panel.style.display = 'block';
+      div.innerHTML = result.senarai.map(p => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f0f0;">
+          <div>
+            <strong>${p.nama}</strong> &nbsp;
+            <span class="badge-pending">${p.peranan}</span><br>
+            <small style="color:#888;">ID: ${p.id}</small>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-green" onclick="luluskanPengguna('${p.id}')">✅ Lulus</button>
+            <button class="btn btn-red"   onclick="tolakPengguna('${p.id}')">❌ Tolak</button>
+          </div>
+        </div>`).join('');
+    } else {
+      panel.style.display = 'none';
+    }
+  } catch(e) {}
+}
+
+async function luluskanPengguna(id) {
+  if (!confirm('Luluskan akaun ' + id + '?')) return;
+  const result = await apiCall({ action: 'luluskanPengguna', id: id });
+  alert(result.mesej);
+  loadPendingPengguna();
+}
+
+async function tolakPengguna(id) {
+  if (!confirm('Tolak permohonan akaun ' + id + '?')) return;
+  const result = await apiCall({ action: 'tolakPengguna', id: id });
+  alert(result.mesej);
+  loadPendingPengguna();
+}
+
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  currentUser = ''; currentRole = 'pensyarah';
+  switchRole('pensyarah');
+}
+
+// ══════════════════════════
+// TABS
+// ══════════════════════════
+function showTab(tabId) {
+  ['tab-profil','tab-aktiviti','tab-pertemuan'].forEach(t => {
+    const el = document.getElementById(t);
+    if (el) el.style.display = t === tabId ? 'block' : 'none';
+  });
+  ['tabBtn-profil','tabBtn-aktiviti','tabBtn-pertemuan'].forEach((bid, i) => {
+    const tabs = ['tab-profil','tab-aktiviti','tab-pertemuan'];
+    const el = document.getElementById(bid);
+    if (el) el.classList.toggle('active', tabs[i] === tabId);
+  });
+  if (tabId === 'tab-aktiviti')  loadAktivitiPelajar();
+  if (tabId === 'tab-pertemuan') loadDropdownAktiviti();
+}
+
+// ══════════════════════════
+// GANTT
+// ══════════════════════════
+let ganttRowCount = 0;
+
+function tambahAktiviti() {
+  const gb = document.getElementById('gantt_body');
+  const i  = ganttRowCount;
+  let r = `<tr id="gantt_row_${i}">
+    <td style="text-align:center; color:#888; font-size:12px;">${i+1}</td>
+    <td><input type="text" id="g_aktiviti_${i}" placeholder="Masukkan aktiviti..." style="width:100%;border:none;outline:none;font-size:13px;font-family:inherit;background:transparent;"></td>
+    <td><input type="date" id="g_tarikh_${i}" style="width:100%;border:none;outline:none;font-size:12px;font-family:inherit;background:transparent;"></td>`;
+  for(let m=0;m<12;m++) r += `<td><input type="checkbox" id="g_${i}_${m}"></td>`;
+  r += `</tr>`;
+  gb.insertAdjacentHTML('beforeend', r);
+  ganttRowCount++;
+}
+
+function buangAktiviti() {
+  if (ganttRowCount <= 1) return;
+  ganttRowCount--;
+  const row = document.getElementById(`gantt_row_${ganttRowCount}`);
+  if (row) row.remove();
+}
+
+// Jana 8 baris awal
+for(let i=0; i<8; i++) tambahAktiviti();
+
+// ══════════════════════════
+// SIMPAN & LOAD GANTT
+// ══════════════════════════
+async function simpanGantt() {
+  const gantt = [];
+  for(let i=0; i<ganttRowCount; i++){
+    const bulan = [];
+    for(let m=0; m<12; m++) bulan.push(document.getElementById(`g_${i}_${m}`)?.checked ? '1' : '0');
+    gantt.push({
+      aktiviti: document.getElementById(`g_aktiviti_${i}`)?.value || '',
+      tarikh:   document.getElementById(`g_tarikh_${i}`)?.value   || '',
+      bulan
+    });
+  }
+  try {
+    const result = await apiCall({ action: 'simpanGantt', pensyarahId: currentUser, gantt: JSON.stringify(gantt) });
+    if (result.status === 'ok') {
+      alert('✅ Carta Perbatuan berjaya disimpan!');
+      kiraPetatusCarta(gantt);
+    } else {
+      alert('❌ ' + result.mesej);
+    }
+  } catch(e) {
+    alert('❌ Gagal sambung ke pelayan.');
+  }
+}
+
+async function loadGantt() {
+  try {
+    const result = await apiCall({ action: 'getGantt', pensyarahId: currentUser });
+    if (result.status === 'ok' && result.gantt) {
+      const gantt = JSON.parse(result.gantt);
+      // Kosongkan baris sedia ada
+      document.getElementById('gantt_body').innerHTML = '';
+      ganttRowCount = 0;
+      // Jana semula baris mengikut data
+      const jumlah = Math.max(gantt.length, 8);
+      for(let i=0; i<jumlah; i++) tambahAktiviti();
+      // Isi data
+      gantt.forEach((g, i) => {
+        const aEl = document.getElementById(`g_aktiviti_${i}`);
+        const tEl = document.getElementById(`g_tarikh_${i}`);
+        if (aEl) aEl.value = g.aktiviti || '';
+        if (tEl) tEl.value = g.tarikh   || '';
+        g.bulan.forEach((v, m) => {
+          const cb = document.getElementById(`g_${i}_${m}`);
+          if (cb) cb.checked = (v === '1');
+        });
+      });
+      kiraPetatusCarta(gantt);
+    }
+  } catch(e) {}
+}
+
+function kiraPetatusCarta(gantt) {
+  if (!gantt || !gantt.length) return;
+  let jumlahKotak = 0, jumlahTick = 0;
+  gantt.forEach(g => {
+    if (g.aktiviti) {
+      jumlahKotak += 12;
+      jumlahTick  += g.bulan.filter(v => v === '1' || v === true || v === '✓').length;
+    }
+  });
+  const peratus = jumlahKotak > 0 ? Math.round((jumlahTick / jumlahKotak) * 100) : 0;
+  const el  = document.getElementById('stat-peratus');
+  const bar = document.getElementById('bar-peratus');
+  if (el)  el.textContent = peratus + '%';
+  if (bar) bar.style.width = peratus + '%';
+}
+
+// ══════════════════════════
+// KALENDAR
+// ══════════════════════════
+const bulanData = [
+  {n:"JANUARI",h:31},{n:"FEBRUARI",h:29},{n:"MAC",h:31},{n:"APRIL",h:30},
+  {n:"MEI",h:31},{n:"JUN",h:30},{n:"JULAI",h:31},{n:"OGOS",h:31},
+  {n:"SEPTEMBER",h:30},{n:"OKTOBER",h:31},{n:"NOVEMBER",h:30},{n:"DISEMBER",h:31}
+];
+const cb = document.getElementById('cal_body');
+bulanData.forEach((b,bi) => {
+  let r = `<tr><td class="bulan">${b.n}</td>`;
+  for(let d=1;d<=31;d++){
+    if(d<=b.h) r += `<td class="day-cell" id="c_${bi}_${d}" onclick="this.classList.toggle('marked')">${d}</td>`;
+    else r += `<td class="noday"></td>`;
+  }
+  r += `</tr>`; cb.innerHTML += r;
+});
+
+// ══════════════════════════
+// REKOD PERTEMUAN
+// ══════════════════════════
+let ptCount = 0;
+function tambahPertemuan() {
+  ptCount++;
+  const list = document.getElementById('pertemuan_list');
+  const d = document.createElement('div');
+  d.className = 'pt-block'; d.id = `pt_${ptCount}`;
+  d.innerHTML = `
+    <div class="pt-title">Pertemuan ke-${ptCount}</div>
+    <div style="padding:14px;">
+      <div class="field-group triple">
+        <div class="field"><label>Tarikh</label><input type="date" id="pt_tarikh_${ptCount}"></div>
+        <div class="field"><label>Masa</label><input type="time" id="pt_masa_${ptCount}"></div>
+        <div class="field"><label>Bilangan</label><input type="text" value="${ptCount}" readonly style="background:#f0f0f0;"></div>
+      </div>
+      <div class="field-group single">
+        <div class="field"><label>Catatan Perjumpaan</label><textarea id="pt_catatan_${ptCount}" placeholder="Nyatakan agenda / topik utama perjumpaan..."></textarea></div>
+      </div>
+      <div class="field-group" style="margin-top:10px;">
+        <div class="field">
+          <label style="color:#e67e22;">✏️ Maklumbalas Tindakan <span style="font-size:11px;font-weight:normal;">(diisi oleh Pensyarah)</span></label>
+          <textarea id="pt_maklum_${ptCount}" placeholder="Akan diisi oleh pensyarah selepas semakan..." style="background:#fffbf0; border-color:#f0c060;" readonly></textarea>
+        </div>
+        <div class="field">
+          <label style="color:#e67e22;">✏️ Cadangan Penambahbaikan <span style="font-size:11px;font-weight:normal;">(diisi oleh Pensyarah)</span></label>
+          <textarea id="pt_cadangan_${ptCount}" placeholder="Akan diisi oleh pensyarah selepas semakan..." style="background:#fffbf0; border-color:#f0c060;" readonly></textarea>
+        </div>
+      </div>
+      <div class="sign-row">
+        <div class="sign-box">Dicatat oleh:<br><br><br>( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br><strong>Pelajar</strong></div>
+        <div class="sign-box">Disahkan oleh:<br><br><br>( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br><strong>Pensyarah Pembimbing</strong></div>
+      </div>
+    </div>`;
+  list.appendChild(d);
+}
+tambahPertemuan();
+
+// ══════════════════════════
+// LIKERT
+// ══════════════════════════
+const likertItems = [
+  "Pengetahuan pensyarah pembimbing sepanjang proses bimbingan kepada pelajar",
+  "Pengalaman pensyarah pembimbing sepanjang memberi tunjuk ajar kepada pelajar",
+  "Interaksi pensyarah pembimbing dengan pelajar",
+  "Penyampaian pensyarah pembimbing sepanjang sesi bimbingan",
+  "Pensyarah pembimbing sentiasa mengambil berat tentang program / aktiviti yang dirancang",
+  "Pensyarah pembimbing bersikap terbuka dalam menerima sebarang pandangan pelajar"
+];
+const lb = document.getElementById('likert_body');
+likertItems.forEach((item,i) => {
+  let r = `<tr><td class="ctr">${i+1}</td><td>${item}</td>`;
+  for(let s=1;s<=5;s++) r += `<td class="ctr"><input type="radio" name="lk_${i}" value="${s}"></td>`;
+  r += `</tr>`; lb.innerHTML += r;
+});
+
+// ══════════════════════════
+// PREVIEW GAMBAR
+// ══════════════════════════
+function previewPhoto(input, spanId) {
+  if(input.files && input.files[0]){
+    const reader = new FileReader();
+    reader.onload = e => {
+      const span = document.getElementById(spanId);
+      const box  = span.parentElement;
+      box.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// ══════════════════════════
+// PROFIL PELAJAR
+// ══════════════════════════
+async function loadProfilPelajar() {
+  try {
+    const result = await apiCall({ action: 'getProfil', pelajarId: currentUser });
+    if (result.status === 'ok' && result.profil) {
+      const p = result.profil;
+      document.getElementById('profil_nama').value      = p.nama    || '';
+      document.getElementById('profil_matrik').value    = p.matrik  || '';
+      document.getElementById('profil_program').value   = p.program || '';
+      document.getElementById('profil_pensyarah').value = p.pensyarah || '';
+      document.getElementById('profil_tahun').value     = p.tahun   || '';
+      document.getElementById('profil_sesi').value      = p.sesi    || '';
+      if (p.gambar) {
+        const el = document.getElementById('foto_profil_prev');
+        el.innerHTML = `<img src="${p.gambar}" style="width:100%;height:100%;object-fit:cover;">`;
+      }
+    }
+  } catch(e) {}
+}
+
+async function simpanProfil() {
+  const gambarEl = document.getElementById('foto_profil_prev').querySelector('img');
+  const payload = {
+    action:    'simpanProfil',
+    pelajarId: currentUser,
+    nama:      document.getElementById('profil_nama').value.trim(),
+    matrik:    document.getElementById('profil_matrik').value.trim(),
+    program:   document.getElementById('profil_program').value.trim(),
+    pensyarah: document.getElementById('profil_pensyarah').value.trim(),
+    tahun:     document.getElementById('profil_tahun').value.trim(),
+    sesi:      document.getElementById('profil_sesi').value.trim(),
+    gambar:    gambarEl ? gambarEl.src : ''
+  };
+  if (!payload.nama) { alert('⚠️ Sila isi nama pelajar.'); return; }
+  try {
+    const result = await apiCall(payload);
+    alert(result.status === 'ok' ? '✅ Profil berjaya disimpan!' : '❌ ' + result.mesej);
+  } catch(e) {
+    alert('❌ Gagal sambung ke pelayan.');
+  }
+}
+
+// ══════════════════════════
+// AKTIVITI PELAJAR
+// ══════════════════════════
+let aktivitiPelajar = [];
+
+async function loadAktivitiPelajar() {
+  try {
+    const result = await apiCall({ action: 'getAktiviti', pelajarId: currentUser });
+    aktivitiPelajar = result.aktiviti || [];
+    const el = document.getElementById('senarai-aktiviti-pelajar');
+    if (!aktivitiPelajar.length) {
+      el.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">Tiada aktiviti lagi. Tambah aktiviti baharu.</p>';
+      document.getElementById('panel-carta-pelajar').style.display = 'none';
+      return;
+    }
+    el.innerHTML = `<table class="data-table"><thead><tr>
+      <th>#</th><th>Nama Aktiviti</th><th>Tarikh Cipta</th><th>Tindakan</th>
+    </tr></thead><tbody>${aktivitiPelajar.map((a,i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>${a.nama}</td>
+        <td>${a.tarikh||'-'}</td>
+        <td><button class="btn btn-blue" style="padding:4px 12px;font-size:12px;" onclick="bukaCarta('${a.id}','${a.nama.replace(/'/g,"\\'")}')">📊 Carta</button></td>
+      </tr>
+    `).join('')}</tbody></table>`;
+  } catch(e) {}
+}
+
+// ID aktiviti yang sedang dibuka untuk carta
+let cartaAktivitiId = '';
+let cartaRowCount = 0;
+
+function bukaCarta(aktivitiId, aktivitiNama) {
+  cartaAktivitiId = aktivitiId;
+  document.getElementById('label-carta-aktiviti').textContent = aktivitiNama;
+  document.getElementById('panel-carta-pelajar').style.display = 'block';
+  // Skrol ke carta
+  document.getElementById('panel-carta-pelajar').scrollIntoView({ behavior: 'smooth' });
+  // Load carta untuk aktiviti ini
+  loadCartaPelajar(aktivitiId);
+}
+
+function tambahAktivitiCarta() {
+  const gb = document.getElementById('gantt_body_pelajar');
+  const i  = cartaRowCount;
+  let r = `<tr id="carta_row_${i}">
+    <td style="text-align:center;color:#888;font-size:12px;">${i+1}</td>
+    <td><input type="text" id="cp_aktiviti_${i}" placeholder="Sub-aktiviti..." style="width:100%;border:none;outline:none;font-size:13px;font-family:inherit;background:transparent;"></td>
+    <td><input type="date" id="cp_tarikh_${i}" style="width:100%;border:none;outline:none;font-size:12px;font-family:inherit;background:transparent;"></td>`;
+  for(let m=0;m<12;m++) r += `<td><input type="checkbox" id="cp_${i}_${m}"></td>`;
+  r += `</tr>`;
+  gb.insertAdjacentHTML('beforeend', r);
+  cartaRowCount++;
+}
+
+function buangAktivitiCarta() {
+  if (cartaRowCount <= 1) return;
+  cartaRowCount--;
+  const row = document.getElementById(`carta_row_${cartaRowCount}`);
+  if (row) row.remove();
+}
+
+function cetakCartaPelajar() {
+  if (!cartaAktivitiId) { alert('⚠️ Sila pilih aktiviti dahulu.'); return; }
+
+  const aktivitiNama = document.getElementById('label-carta-aktiviti').textContent;
+  const namaPelajar  = document.getElementById('profil_nama').value || currentUser;
+  const bulanLabel   = ['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogos','Sep','Okt','Nov','Dis'];
+
+  let baris = '';
+  for(let i=0; i<cartaRowCount; i++){
+    const sub    = document.getElementById(`cp_aktiviti_${i}`)?.value || '-';
+    const tarikh = document.getElementById(`cp_tarikh_${i}`)?.value   || '-';
+    if (!sub || sub === '-') continue;
+    let sel = '';
+    bulanLabel.forEach((b, m) => {
+      const checked = document.getElementById(`cp_${i}_${m}`)?.checked;
+      sel += `<td style="text-align:center; background:${checked ? '#1a3a6b' : '#fff'}; color:${checked ? '#fff' : '#333'}; font-weight:${checked ? 'bold' : 'normal'};">${checked ? '✓' : ''}</td>`;
+    });
+    baris += `<tr>
+      <td style="text-align:center;">${i+1}</td>
+      <td>${sub}</td>
+      <td style="text-align:center;">${tarikh}</td>
+      ${sel}
+    </tr>`;
+  }
+
+  const html = `<!DOCTYPE html><html lang="ms"><head><meta charset="UTF-8">
+  <title>Carta Perbatuan — ${aktivitiNama}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 11pt; padding: 15mm; color: #111; }
+    h1 { font-size: 15pt; color: #1a3a6b; text-align: center; margin-bottom: 4px; }
+    h2 { font-size: 12pt; color: #1a3a6b; text-align: center; margin-bottom: 16px; }
+    p  { font-size: 10pt; color: #555; text-align: center; margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+    th { background: #1a3a6b; color: white; padding: 7px 4px; text-align: center; font-size: 10pt; }
+    th.lbl { text-align: left; padding-left: 8px; }
+    td { border: 1px solid #ccc; padding: 6px 4px; vertical-align: middle; }
+    .footer { text-align: center; font-size: 9pt; color: #aaa; margin-top: 24px; border-top: 1px solid #ddd; padding-top: 8px; }
+    @media print { body { padding: 10mm; } }
+  </style>
+  </head><body>
+  <h1>📊 CARTA PERBATUAN</h1>
+  <h2>${aktivitiNama}</h2>
+  <p>Pelajar: <strong>${namaPelajar}</strong> &nbsp;|&nbsp; Tarikh Cetak: ${new Date().toLocaleDateString('ms-MY')}</p>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:4%;">Bil</th>
+        <th class="lbl" style="width:28%;">Sub-Aktiviti</th>
+        <th style="width:10%;">Tarikh Perancangan</th>
+        ${bulanLabel.map(b => `<th style="width:4%;">${b}</th>`).join('')}
+      </tr>
+    </thead>
+    <tbody>${baris}</tbody>
+  </table>
+  <div class="footer">Dijana oleh Sistem eLog Perjumpaan Pelajar</div>
+  </body></html>`;
+
+  const win = window.open('', '_blank');
+  if (!win) {
+    const blob = new Blob([html], { type: 'text/html' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'Carta-Perbatuan.html'; a.click();
+    URL.revokeObjectURL(url);
+    alert('ℹ️ Pop-up disekat. Fail HTML dimuat turun — buka dan cetak dari situ.');
+    return;
+  }
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => { win.focus(); win.print(); }, 800);
+}
+
+async function simpanCartaPelajar() {
+  if (!cartaAktivitiId) { alert('⚠️ Sila pilih aktiviti dahulu.'); return; }
+  const carta = [];
+  for(let i=0; i<cartaRowCount; i++){
+    const bulan = [];
+    for(let m=0; m<12; m++) bulan.push(document.getElementById(`cp_${i}_${m}`)?.checked ? '1' : '0');
+    carta.push({
+      aktiviti: document.getElementById(`cp_aktiviti_${i}`)?.value || '',
+      tarikh:   document.getElementById(`cp_tarikh_${i}`)?.value   || '',
+      bulan
+    });
+  }
+  try {
+    const result = await apiCall({ action: 'simpanCartaAktiviti', aktivitiId: cartaAktivitiId, pelajarId: currentUser, carta: JSON.stringify(carta) });
+    if (result.status === 'ok') {
+      alert('✅ Carta berjaya disimpan!');
+    } else {
+      alert('❌ ' + result.mesej);
+    }
+  } catch(e) {
+    alert('❌ Gagal sambung ke pelayan.');
+  }
+}
+
+async function loadCartaPelajar(aktivitiId) {
+  // Kosongkan carta
+  document.getElementById('gantt_body_pelajar').innerHTML = '';
+  cartaRowCount = 0;
+  try {
+    const result = await apiCall({ action: 'getCartaAktiviti', aktivitiId, pelajarId: currentUser });
+    if (result.status === 'ok' && result.carta) {
+      const carta = JSON.parse(result.carta);
+      const jumlah = Math.max(carta.length, 3);
+      for(let i=0; i<jumlah; i++) tambahAktivitiCarta();
+      carta.forEach((g, i) => {
+        const aEl = document.getElementById(`cp_aktiviti_${i}`);
+        const tEl = document.getElementById(`cp_tarikh_${i}`);
+        if (aEl) aEl.value = g.aktiviti || '';
+        if (tEl) tEl.value = g.tarikh   || '';
+        g.bulan.forEach((v, m) => {
+          const cb = document.getElementById(`cp_${i}_${m}`);
+          if (cb) cb.checked = (v === '1');
+        });
+      });
+    } else {
+      // Mulakan dengan 3 baris kosong
+      for(let i=0; i<3; i++) tambahAktivitiCarta();
+    }
+  } catch(e) {
+    for(let i=0; i<3; i++) tambahAktivitiCarta();
+  }
+}
+
+// ══════════════════════════
+// HANTAR MAKLUMBALAS PELAJAR
+// ══════════════════════════
+async function hantarMaklumbalas() {
+  const aktivitiId = document.getElementById('pilih_aktiviti').value;
+  const aktivitiNama = document.getElementById('pilih_aktiviti').options[document.getElementById('pilih_aktiviti').selectedIndex]?.text || '';
+  if (!aktivitiId) { alert('⚠️ Sila pilih aktiviti terlebih dahulu.'); return; }
+
+  const likert = [];
+  likertItems.forEach((_,i) => {
+    const sel = document.querySelector(`input[name="lk_${i}"]:checked`);
+    likert.push(sel ? parseInt(sel.value) : 0);
+  });
+
+  const belumIsi = likert.filter(v => v === 0).length;
+  if (belumIsi > 0) {
+    if (!confirm(`⚠️ Masih ada ${belumIsi} soalan belum dijawab. Hantar juga?`)) return;
+  }
+
+  try {
+    const result = await apiCall({
+      action: 'simpanMaklumbalas',
+      aktivitiId,
+      aktivitiNama,
+      pelajarId: currentUser,
+      namaPelajar: document.getElementById('profil_nama').value || currentUser,
+      likert: JSON.stringify(likert)
+    });
+    if (result.status === 'ok') {
+      alert('✅ Penilaian berjaya dihantar kepada pensyarah!');
+      // Reset likert
+      document.querySelectorAll('#likert_body input[type=radio]').forEach(r => r.checked = false);
+    } else {
+      alert('❌ ' + result.mesej);
+    }
+  } catch(e) {
+    alert('❌ Gagal sambung ke pelayan.');
+  }
+}
+
+// ══════════════════════════
+// ANALISIS MAKLUMBALAS — PENSYARAH
+// ══════════════════════════
+async function loadAktivitiUntukAnalisis() {
+  try {
+    const result = await apiCall({ action: 'getSemuaAktivitiPensyarah', pensyarahNama: currentNama });
+    const sel = document.getElementById('pilih_aktiviti_analisis');
+    if (result.status === 'ok' && result.aktiviti && result.aktiviti.length) {
+      sel.innerHTML = '<option value="">-- Pilih aktiviti --</option>';
+      result.aktiviti.forEach(a => {
+        sel.innerHTML += `<option value="${a.id}">${a.nama} (${a.pelajar})</option>`;
+      });
+      document.getElementById('panel-analisis').style.display = 'block';
+    }
+  } catch(e) {}
+}
+
+async function loadAnalisisMaklumbalas() {
+  const aktivitiId = document.getElementById('pilih_aktiviti_analisis').value;
+  const el = document.getElementById('hasil-analisis');
+  if (!aktivitiId) { el.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">Pilih aktiviti untuk lihat analisis.</p>'; return; }
+
+  el.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">⏳ Memuatkan analisis...</p>';
+  try {
+    const result = await apiCall({ action: 'getMaklumbalas', aktivitiId });
+    if (result.status !== 'ok' || !result.senarai || !result.senarai.length) {
+      el.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">Tiada penilaian lagi untuk aktiviti ini.</p>';
+      return;
+    }
+
+    const senarai = result.senarai;
+    const bilSoalan = likertItems.length;
+    // Kira purata setiap soalan
+    const jumlah = Array(bilSoalan).fill(0);
+    senarai.forEach(s => {
+      const lk = JSON.parse(s.likert || '[]');
+      lk.forEach((v,i) => { jumlah[i] += parseInt(v) || 0; });
+    });
+    const purata = jumlah.map(j => (j / senarai.length).toFixed(2));
+    const purataSel = (purata.reduce((a,b) => a + parseFloat(b), 0) / bilSoalan).toFixed(2);
+    const peratus = Math.round((purataSel / 5) * 100);
+    const warna = purataSel >= 4 ? '#27ae60' : purataSel >= 3 ? '#e67e22' : '#e74c3c';
+
+    // Bar chart SVG
+    const barW = 40, gap = 14, padL = 10, padT = 20, maxH = 120, chartH = 180;
+    const totalW = padL + bilSoalan * (barW + gap) + gap;
+    let bars = '';
+    purata.forEach((p, i) => {
+      const bh = (parseFloat(p)/5) * maxH;
+      const x  = padL + gap + i*(barW+gap);
+      const y  = padT + (maxH - bh);
+      bars += `
+        <rect x="${x}" y="${y}" width="${barW}" height="${bh}" rx="4" fill="${warna}" opacity="0.85"/>
+        <text x="${x+barW/2}" y="${y-6}" text-anchor="middle" font-size="11" font-weight="bold" fill="${warna}">${p}</text>
+        <text x="${x+barW/2}" y="${padT+maxH+16}" text-anchor="middle" font-size="9" fill="#666">S${i+1}</text>`;
+    });
+
+    el.innerHTML = `
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px;">
+        <div style="flex:1;min-width:130px;background:#f7f9fc;border-radius:10px;padding:16px;text-align:center;border-top:4px solid ${warna};">
+          <div style="font-size:30px;font-weight:bold;color:${warna};">${purataSel}</div>
+          <div style="font-size:12px;color:#888;margin-top:4px;">Purata Skor (/ 5.00)</div>
+        </div>
+        <div style="flex:1;min-width:130px;background:#f7f9fc;border-radius:10px;padding:16px;text-align:center;border-top:4px solid ${warna};">
+          <div style="font-size:30px;font-weight:bold;color:${warna};">${peratus}%</div>
+          <div style="font-size:12px;color:#888;margin-top:4px;">Peratusan Keseluruhan</div>
+        </div>
+        <div style="flex:1;min-width:130px;background:#f7f9fc;border-radius:10px;padding:16px;text-align:center;border-top:4px solid ${warna};">
+          <div style="font-size:18px;font-weight:bold;color:${warna};margin-top:4px;">${senarai.length} pelajar</div>
+          <div style="font-size:12px;color:#888;margin-top:4px;">Bilangan Responden</div>
+        </div>
+      </div>
+      <svg width="100%" viewBox="0 0 ${totalW} ${chartH}" style="max-width:100%;overflow:visible;">${bars}</svg>
+      <p style="font-size:11px;color:#aaa;margin-top:8px;">S1-S${bilSoalan} merujuk kepada soalan 1 hingga ${bilSoalan} dalam borang maklumbalas</p>
+      <table class="data-table" style="margin-top:14px;font-size:12px;">
+        <thead><tr><th>Bil</th><th style="text-align:left;">Soalan</th><th>Purata</th></tr></thead>
+        <tbody>${likertItems.map((item,i) => `
+          <tr><td>${i+1}</td><td>${item}</td><td style="text-align:center;font-weight:bold;color:${warna};">${purata[i]}</td></tr>
+        `).join('')}</tbody>
+      </table>`;
+  } catch(e) {
+    el.innerHTML = '<p style="color:#e74c3c;text-align:center;padding:20px;">❌ Gagal muatkan analisis.</p>';
+  }
+}
+
+async function simpanAktiviti() {
+  const nama = document.getElementById('aktiviti_nama').value.trim();
+  if (!nama) { alert('⚠️ Sila masukkan nama aktiviti.'); return; }
+  try {
+    const result = await apiCall({ action: 'simpanAktiviti', pelajarId: currentUser, nama });
+    if (result.status === 'ok') {
+      alert('✅ Aktiviti berjaya disimpan!');
+      document.getElementById('aktiviti_nama').value = '';
+      loadAktivitiPelajar();
+    } else {
+      alert('❌ ' + result.mesej);
+    }
+  } catch(e) {
+    alert('❌ Gagal sambung ke pelayan.');
+  }
+}
+
+async function loadDropdownAktiviti() {
+  try {
+    const result = await apiCall({ action: 'getAktiviti', pelajarId: currentUser });
+    aktivitiPelajar = result.aktiviti || [];
+    const sel = document.getElementById('pilih_aktiviti');
+    sel.innerHTML = '<option value="">-- Pilih aktiviti --</option>';
+    aktivitiPelajar.forEach(a => {
+      sel.innerHTML += `<option value="${a.id}">${a.nama}</option>`;
+    });
+  } catch(e) {}
+}
+
+async function loadRekodMengikutAktiviti() {
+  const aktivitiId = document.getElementById('pilih_aktiviti').value;
+  const el = document.getElementById('rekod-list-pelajar');
+  const btnCetak = document.getElementById('btn-cetak-pelajar');
+  if (!aktivitiId) {
+    el.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">Pilih aktiviti untuk lihat rekod pertemuan.</p>';
+    btnCetak.style.display = 'none';
+    return;
+  }
+  el.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">⏳ Memuatkan rekod...</p>';
+  try {
+    const result = await apiCall({ action: 'getRekod', pelajarId: currentUser });
+    const aktivitiNama = document.getElementById('pilih_aktiviti').options[document.getElementById('pilih_aktiviti').selectedIndex]?.text || '';
+    const semua = result.rekod || [];
+    // Tapisan: sama aktivitiId ATAU nama program mengandungi nama aktiviti (untuk rekod lama)
+    const rekodAktiviti = semua.filter(r =>
+      (r.aktivitiId && r.aktivitiId === aktivitiId) ||
+      (!r.aktivitiId && r.pensyarah && aktivitiNama && (r.program||'').toLowerCase().includes(aktivitiNama.toLowerCase()))
+    );
+    // Kalau masih tiada, papar semua rekod pelajar ini
+    const papar = rekodAktiviti.length ? rekodAktiviti : semua;
+    if (!papar.length) {
+      el.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">Tiada rekod pertemuan lagi. Hantar rekod pertemuan baharu di atas.</p>';
+      btnCetak.style.display = 'none';
+      return;
+    }
+    let html = `<table class="data-table"><thead><tr>
+      <th>#</th><th>Tarikh Hantar</th><th>Bil. Pertemuan</th><th>Status</th><th>Tindakan</th>
+    </tr></thead><tbody>`;
+    papar.forEach((r,i) => {
+      const badge = r.status === 'Disahkan'
+        ? '<span class="badge-status badge-approved">✅ Disahkan</span>'
+        : '<span class="badge-status badge-pending">⏳ Menunggu</span>';
+      html += `<tr>
+        <td>${i+1}</td>
+        <td>${r.tarikhHantar}</td>
+        <td>${r.bilPertemuan}</td>
+        <td>${badge}</td>
+        <td><button class="btn btn-red" style="padding:4px 10px;font-size:12px;" onclick="cetakLaporan('${r.id}')">🖨️ Cetak</button></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+    btnCetak.style.display = 'flex';
+  } catch(e) {
+    el.innerHTML = '<p style="color:#e74c3c;text-align:center;padding:20px;">❌ Gagal muatkan rekod.</p>';
+  }
+}
+
+function cetakRekodPelajar() {
+  const aktivitiId = document.getElementById('pilih_aktiviti').value;
+  const aktivitiNama = document.getElementById('pilih_aktiviti').options[document.getElementById('pilih_aktiviti').selectedIndex]?.text || '';
+  // Print keseluruhan tab pertemuan
+  window.print();
+}
+
+function exportWordPelajar() {
+  const aktivitiNama = document.getElementById('pilih_aktiviti').options[document.getElementById('pilih_aktiviti').selectedIndex]?.text || 'Aktiviti';
+  const rows = document.querySelectorAll('#rekod-list-pelajar table tr');
+  let jadual = '<table border="1" cellpadding="6" style="width:100%;border-collapse:collapse;"><tr style="background:#1a3a6b;color:white;"><th>Bil</th><th>Tarikh Hantar</th><th>Bil. Pertemuan</th><th>Status</th></tr>';
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const cells = r.querySelectorAll('td');
+    if (cells.length >= 4)
+      jadual += `<tr><td>${cells[0].textContent}</td><td>${cells[1].textContent}</td><td>${cells[2].textContent}</td><td>${cells[3].textContent}</td></tr>`;
+  });
+  jadual += '</table>';
+  const html = `<html><head><meta charset="UTF-8"><style>body{font-family:Arial;font-size:12pt;margin:2cm;}h1{color:#1a3a6b;text-align:center;}h2{color:#1a3a6b;}table{width:100%;border-collapse:collapse;}td,th{border:1px solid #333;padding:8px;}</style></head><body>
+  <h1>eLOG PERJUMPAAN PELAJAR</h1>
+  <h2>Aktiviti: ${aktivitiNama}</h2>
+  <p><b>Pelajar:</b> ${document.getElementById('profil_nama').value || currentUser}</p>
+  ${jadual}</body></html>`;
+  const blob = new Blob(['\ufeff', html], {type:'application/msword'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='Rekod-Pertemuan.doc'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════
+// SIMPAN LOG → GOOGLE SHEETS
+// ══════════════════════════
+async function simpanLog() {
+  const aktivitiId  = document.getElementById('pilih_aktiviti').value;
+  const aktivitiNama = document.getElementById('pilih_aktiviti').options[document.getElementById('pilih_aktiviti').selectedIndex]?.text || '';
+  if (!aktivitiId) { alert('⚠️ Sila pilih aktiviti terlebih dahulu.'); return; }
+
+  // Ambil profil dari borang profil
+  const profil = {
+    nama:      document.getElementById('profil_nama').value,
+    matrik:    document.getElementById('profil_matrik').value,
+    program:   document.getElementById('profil_program').value,
+    pensyarah: document.getElementById('profil_pensyarah').value,
+    tahun:     document.getElementById('profil_tahun').value,
+    sesi:      document.getElementById('profil_sesi').value,
+  };
+
+  const pertemuan = [];
+  for(let i=1;i<=ptCount;i++){
+    pertemuan.push({
+      bil:      i,
+      tarikh:   document.getElementById(`pt_tarikh_${i}`)?.value || '',
+      masa:     document.getElementById(`pt_masa_${i}`)?.value   || '',
+      catatan:  document.getElementById(`pt_catatan_${i}`)?.value|| '',
+      maklum:   document.getElementById(`pt_maklum_${i}`)?.value || '',
+      cadangan: document.getElementById(`pt_cadangan_${i}`)?.value||''
+    });
+  }
+  const likert = [];
+  likertItems.forEach((_,i) => {
+    const sel = document.querySelector(`input[name="lk_${i}"]:checked`);
+    likert.push(sel ? sel.value : '-');
+  });
+
+  const payload = {
+    action:          'simpanLog',
+    pelajarId:       currentUser,
+    aktivitiId,
+    aktivitiNama,
+    pensyarah:       profil.pensyarah,
+    program:         aktivitiNama,
+    tahun:           profil.tahun,
+    sesi:            profil.sesi,
+    nama_pelajar:    profil.nama,
+    no_matrik:       profil.matrik,
+    program_pelajar: profil.program,
+    pertemuan,
+    likert,
+    gantt:           [],
+    pertandingan:    '',
+    kejayaan:        '',
+  };
+
+  const btnSimpan = document.querySelector('[onclick="simpanLog()"]');
+  btnSimpan.textContent = '⏳ Menyimpan...';
+  btnSimpan.disabled = true;
+
+  try {
+    const result = await apiCall(payload);
+    if (result.status === 'ok') {
+      alert('✅ ' + result.mesej);
+      resetFormPertemuan();
+      showTab('tab-sejarah');
+    } else {
+      alert('❌ Gagal simpan: ' + result.mesej);
+    }
+  } catch(e) {
+    alert('❌ Gagal sambung ke Google Sheets. Semak URL API anda.');
+  }
+  btnSimpan.textContent = '💾 Hantar Rekod';
+  btnSimpan.disabled = false;
+}
+
+// ══════════════════════════
+// LOAD REKOD — PELAJAR (dari Google Sheets)
+// ══════════════════════════
+async function loadRekodPelajar() {
+  const el = document.getElementById('rekod-list-pelajar');
+  el.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">⏳ Memuatkan rekod...</p>';
+  try {
+    const result = await apiCall({ action: 'getRekod', pelajarId: currentUser });
+    if (!result.rekod || !result.rekod.length) {
+      el.innerHTML = '<p style="color:#888;text-align:center;padding:30px;">Tiada rekod lagi. Isi log baru dahulu.</p>';
+      return;
+    }
+
+    // Auto-tandakan kalendar untuk rekod yang Disahkan
+    autoMarkKalendar(result.rekod);
+
+    let html = `<table class="data-table"><thead><tr>
+      <th>#</th><th>Tarikh Hantar</th><th>Pensyarah</th><th>Bil. Pertemuan</th><th>Status</th><th>Tindakan</th>
+    </tr></thead><tbody>`;
+    result.rekod.forEach((r,i) => {
+      const badge = r.status === 'Disahkan'
+        ? '<span class="badge-status badge-approved">✅ Disahkan</span>'
+        : '<span class="badge-status badge-pending">⏳ Menunggu</span>';
+      const btnPrint = r.status === 'Disahkan'
+        ? `<button class="btn btn-red" style="padding:5px 12px;font-size:12px;" onclick="cetakLaporan('${r.id}')">🖨️ Cetak PDF</button>`
+        : `<span style="color:#aaa;font-size:12px;">-</span>`;
+      html += `<tr>
+        <td>${i+1}</td>
+        <td>${r.tarikhHantar}</td>
+        <td>${r.pensyarah||'-'}</td>
+        <td>${r.bilPertemuan}</td>
+        <td>${badge}</td>
+        <td>${btnPrint}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<p style="color:#e74c3c;text-align:center;padding:20px;">❌ Gagal muatkan rekod. Semak sambungan API.</p>';
+  }
+}
+
+// ══════════════════════════
+// AUTO TANDAKAN KALENDAR
+// ══════════════════════════
+async function autoMarkKalendar(rekodList) {
+  // Kumpul semua tarikh dari rekod yang Disahkan
+  const tarikhDisahkan = new Set();
+  for (const r of rekodList) {
+    if (r.status === 'Disahkan' && r.tarikhPertemuan) {
+      // tarikhPertemuan adalah array tarikh dari rekod
+      const tarikh = Array.isArray(r.tarikhPertemuan) ? r.tarikhPertemuan : [r.tarikhPertemuan];
+      tarikh.forEach(t => { if (t) tarikhDisahkan.add(t); });
+    }
+  }
+  // Jika tiada dari API, dapatkan dari rekod penuh
+  if (!tarikhDisahkan.size) {
+    for (const r of rekodList) {
+      if (r.status === 'Disahkan') {
+        try {
+          const res = await apiCall({ action: 'getRekodPenuh', rekodId: r.id });
+          if (res.status === 'ok') {
+            const pertemuan = JSON.parse(res.rekod.pertemuan || '[]');
+            pertemuan.forEach(pt => { if (pt.tarikh) tarikhDisahkan.add(pt.tarikh); });
+          }
+        } catch(e) {}
+      }
+    }
+  }
+  // Tandakan dalam kalendar
+  // Kosongkan semua tanda dulu
+  document.querySelectorAll('.day-cell.marked-auto').forEach(el => {
+    el.classList.remove('marked-auto');
+  });
+  tarikhDisahkan.forEach(tarikh => {
+    // Format tarikh: YYYY-MM-DD
+    const d = new Date(tarikh);
+    if (isNaN(d)) return;
+    const bulanIdx = d.getMonth(); // 0-11
+    const hari     = d.getDate();  // 1-31
+    const cell = document.getElementById(`c_${bulanIdx}_${hari}`);
+    if (cell) {
+      cell.classList.add('marked');
+      cell.classList.add('marked-auto');
+      cell.title = `Perjumpaan Disahkan: ${tarikh}`;
+    }
+  });
+}
+
+// ══════════════════════════
+// LOAD REKOD — PENSYARAH (dari Google Sheets)
+// ══════════════════════════
+async function loadRekodPensyarah() {
+  const el = document.getElementById('rekod-list-pensyarah');
+  el.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">⏳ Memuatkan rekod...</p>';
+  try {
+    const result = await apiCall({ action: 'semuaRekod' });
+    const all      = (result.rekod || []).filter(r => {
+      if (!r.pensyarah) return false;
+      const namaPensyarah = r.pensyarah.trim().toLowerCase();
+      const namaLogin     = currentNama.trim().toLowerCase();
+      // match kalau nama pensyarah mengandungi mana-mana perkataan dari nama login
+      return namaLogin.split(' ').some(k => k.length > 2 && namaPensyarah.includes(k));
+    });
+    const total    = all.length;
+    const approved = all.filter(r => r.status === 'Disahkan').length;
+    const pending  = all.filter(r => r.status !== 'Disahkan').length;
+    document.getElementById('stat-total').textContent    = total;
+    document.getElementById('stat-approved').textContent = approved;
+    document.getElementById('stat-pending').textContent  = pending;
+    if (!total) {
+      el.innerHTML = '<p style="color:#888;text-align:center;padding:30px;">Tiada rekod lagi.</p>';
+      return;
+    }
+    let html = `<table class="data-table"><thead><tr>
+      <th>#</th><th>Tarikh Hantar</th><th>Pelajar</th><th>Pensyarah</th><th>Pertemuan</th><th>Status</th><th>Tindakan</th>
+    </tr></thead><tbody>`;
+    all.forEach((r,i) => {
+      const badge = r.status === 'Disahkan'
+        ? '<span class="badge-status badge-approved">✅ Disahkan</span>'
+        : '<span class="badge-status badge-pending">⏳ Menunggu</span>';
+      const btn = r.status !== 'Disahkan'
+        ? `<button class="btn btn-orange" style="padding:5px 12px;font-size:12px;" onclick="bukaSemakan('${r.id}','${r.nama_pelajar||r.pelajarId}')">✏️ Semak & Lulus</button>`
+        : `<span style="color:#27ae60;font-size:12px;">✅ Diluluskan</span>`;
+      html += `<tr>
+        <td>${i+1}</td>
+        <td>${r.tarikhHantar}</td>
+        <td>${r.nama_pelajar||r.pelajarId}</td>
+        <td>${r.pensyarah||'-'}</td>
+        <td>${r.bilPertemuan}</td>
+        <td>${badge}</td>
+        <td>${btn}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    el.innerHTML = html;
+    // Tandakan kalendar dengan semua tarikh pertemuan
+    autoMarkKaledarPensyarah(all);
+  } catch(e) {
+    el.innerHTML = '<p style="color:#e74c3c;text-align:center;padding:20px;">❌ Gagal muatkan rekod. Semak sambungan API.</p>';
+  }
+}
+
+// ══════════════════════════
+// AUTO TANDAKAN KALENDAR — PENSYARAH
+// ══════════════════════════
+async function autoMarkKaledarPensyarah(rekodList) {
+  // Kosongkan semua tanda auto dulu
+  document.querySelectorAll('.day-cell.marked-auto').forEach(el => el.classList.remove('marked','marked-auto'));
+
+  const tarikhSet = new Set();
+  for (const r of rekodList) {
+    try {
+      const res = await apiCall({ action: 'getRekodPenuh', rekodId: r.id });
+      if (res.status === 'ok') {
+        const pertemuan = JSON.parse(res.rekod.pertemuan || '[]');
+        pertemuan.forEach(pt => { if (pt.tarikh) tarikhSet.add(pt.tarikh); });
+      }
+    } catch(e) {}
+  }
+
+  tarikhSet.forEach(tarikh => {
+    const d = new Date(tarikh);
+    if (isNaN(d)) return;
+    const bulanIdx = d.getMonth();
+    const hari     = d.getDate();
+    const cell = document.getElementById(`c_${bulanIdx}_${hari}`);
+    if (cell) {
+      cell.classList.add('marked', 'marked-auto');
+      cell.title = `Perjumpaan: ${tarikh}`;
+    }
+  });
+}
+
+// ══════════════════════════
+// BUKA MODAL SEMAKAN PENSYARAH
+// ══════════════════════════
+// ══════════════════════════
+// CETAK LAPORAN PDF
+// ══════════════════════════
+async function cetakLaporan(rekodId) {
+  let rekod = null;
+  try {
+    const result = await apiCall({ action: 'getRekodPenuh', rekodId });
+    if (result.status === 'ok') rekod = result.rekod;
+  } catch(e) {}
+
+  if (!rekod) { alert('❌ Gagal muatkan rekod.'); return; }
+
+  const pertemuan = JSON.parse(rekod.pertemuan || '[]');
+
+  // Dapatkan maklumat tambahan dari Google Sheets
+  let maklumat = null;
+  try {
+    const r2 = await apiCall({ action: 'getRekodMaklumat', rekodId });
+    if (r2.status === 'ok') maklumat = r2.data;
+  } catch(e) {}
+
+  // Bina kandungan laporan
+  let ptRows = '';
+  pertemuan.forEach((pt, i) => {
+    ptRows += `
+      <div class="pt-sec">
+        <div class="pt-hdr">Pertemuan ke-${pt.bil || i+1}</div>
+        <table class="info-table">
+          <tr><td class="lbl">Tarikh</td><td>${pt.tarikh||'-'}</td><td class="lbl">Masa</td><td>${pt.masa||'-'}</td></tr>
+          <tr><td class="lbl" colspan="1">Catatan Perjumpaan</td><td colspan="3">${pt.catatan||'-'}</td></tr>
+          <tr><td class="lbl">Maklumbalas Tindakan</td><td colspan="3">${pt.maklum||'-'}</td></tr>
+          <tr><td class="lbl">Cadangan Penambahbaikan</td><td colspan="3">${pt.cadangan||'-'}</td></tr>
+        </table>
+        <div class="sign-row">
+          <div class="sign-box">Dicatat oleh:<br><br><br>( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br><b>Pelajar</b></div>
+          <div class="sign-box">Disahkan oleh:<br><br><br>( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br><b>Pensyarah Pembimbing</b></div>
+        </div>
+      </div>`;
+  });
+
+  const html = `<!DOCTYPE html><html lang="ms"><head><meta charset="UTF-8">
+  <title>Laporan eLog Perjumpaan Pelajar</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 12pt; color: #111; padding: 20mm 20mm 15mm 20mm; }
+    .cover { text-align: center; margin-bottom: 20px; border-bottom: 3px solid #1a3a6b; padding-bottom: 15px; }
+    .cover h1 { font-size: 18pt; color: #1a3a6b; margin-bottom: 4px; }
+    .cover p  { font-size: 11pt; color: #555; }
+    .badge-approved { background: #d1fae5; color: #065f46; padding: 2px 10px; border-radius: 10px; font-size: 10pt; font-weight: bold; }
+    .section-title { font-size: 13pt; font-weight: bold; color: #1a3a6b; border-left: 4px solid #1a3a6b; padding-left: 8px; margin: 18px 0 10px; }
+    .info-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 11pt; }
+    .info-table td { border: 1px solid #aaa; padding: 7px 10px; vertical-align: top; }
+    .info-table td.lbl { background: #f0f4fa; font-weight: bold; color: #1a3a6b; width: 22%; }
+    .pt-sec { margin-bottom: 18px; page-break-inside: avoid; }
+    .pt-hdr { background: #1a3a6b; color: white; padding: 6px 12px; font-weight: bold; font-size: 11pt; border-radius: 4px 4px 0 0; }
+    .sign-row { display: flex; gap: 30px; margin-top: 14px; }
+    .sign-box { flex: 1; border-top: 1.5px solid #1a3a6b; padding-top: 6px; font-size: 10pt; color: #444; }
+    .footer { text-align: center; font-size: 9pt; color: #aaa; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 10px; }
+    @media print { body { padding: 0; } }
+  </style>
+  </head><body>
+  <div class="cover">
+    <h1>📚 eLOG PERJUMPAAN PELAJAR</h1>
+    <p>Sistem Rekod Digital Bimbingan &amp; Pertemuan Pelajar</p>
+    <p style="margin-top:8px;"><span class="badge-approved">✅ TELAH DISAHKAN</span></p>
+  </div>
+
+  <div class="section-title">Maklumat Pensyarah Pembimbing</div>
+  <table class="info-table">
+    <tr><td class="lbl">Nama Pensyarah</td><td>${maklumat?.pensyarah||'-'}</td><td class="lbl">Program / Aktiviti</td><td>${maklumat?.program||'-'}</td></tr>
+    <tr><td class="lbl">Tahun</td><td>${maklumat?.tahun||'-'}</td><td class="lbl">Sesi Pengajian</td><td>${maklumat?.sesi||'-'}</td></tr>
+  </table>
+
+  <div class="section-title">Maklumat Pelajar</div>
+  <table class="info-table">
+    <tr><td class="lbl">Nama Pelajar</td><td>${maklumat?.nama_pelajar||'-'}</td><td class="lbl">No. Matrik</td><td>${maklumat?.no_matrik||'-'}</td></tr>
+    <tr><td class="lbl">Program</td><td colspan="3">${maklumat?.program_pelajar||'-'}</td></tr>
+  </table>
+
+  <div class="section-title">Rekod Pertemuan</div>
+  ${ptRows}
+
+  <div class="footer">Laporan dijana oleh Sistem eLog Perjumpaan Pelajar &nbsp;|&nbsp; Tarikh Cetak: ${new Date().toLocaleDateString('ms-MY')}</div>
+  </body></html>`;
+
+  // Buka dalam tab baru dan cetak
+  const win = window.open('', '_blank');
+  if (!win) {
+    // Pop-up disekat — simpan sebagai fail HTML
+    const blob = new Blob([html], { type: 'text/html' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'Laporan-eLog.html'; a.click();
+    URL.revokeObjectURL(url);
+    alert('ℹ️ Pop-up disekat oleh browser. Fail HTML telah dimuat turun — buka dan cetak dari situ.');
+    return;
+  }
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => { win.focus(); win.print(); }, 800);
+}
+
+async function bukaSemakan(rekodId, namaPelajar) {
+  // Dapatkan rekod penuh
+  let rekod = null;
+  try {
+    const result = await apiCall({ action: 'getRekodPenuh', rekodId });
+    if (result.status === 'ok') rekod = result.rekod;
+  } catch(e) {}
+
+  // Bina modal
+  const pertemuan = rekod ? (JSON.parse(rekod.pertemuan || '[]')) : [];
+  let ptHTML = '';
+  if (pertemuan.length) {
+    pertemuan.forEach((pt, idx) => {
+      ptHTML += `
+        <div style="border:1px solid #ddd;border-radius:6px;margin-bottom:12px;overflow:hidden;">
+          <div style="background:#1a3a6b;color:white;padding:7px 12px;font-size:13px;font-weight:bold;">Pertemuan ke-${pt.bil||idx+1}</div>
+          <div style="padding:12px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+              <div><label style="font-size:11px;font-weight:bold;color:#555;">TARIKH</label><div style="font-size:13px;">${pt.tarikh||'-'}</div></div>
+              <div><label style="font-size:11px;font-weight:bold;color:#555;">MASA</label><div style="font-size:13px;">${pt.masa||'-'}</div></div>
+            </div>
+            <div style="margin-bottom:8px;"><label style="font-size:11px;font-weight:bold;color:#555;">CATATAN PERJUMPAAN</label><div style="font-size:13px;background:#f7f9fc;padding:7px;border-radius:4px;margin-top:3px;">${pt.catatan||'-'}</div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <label style="font-size:11px;font-weight:bold;color:#e67e22;">✏️ MAKLUMBALAS TINDAKAN (Pensyarah)</label>
+                <textarea id="modal_maklum_${idx}" style="width:100%;margin-top:3px;padding:7px;border:1.5px solid #f0c060;border-radius:4px;font-size:13px;font-family:inherit;resize:vertical;min-height:60px;background:#fffbf0;" placeholder="Isi maklumbalas tindakan...">${pt.maklum||''}</textarea>
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:bold;color:#e67e22;">✏️ CADANGAN PENAMBAHBAIKAN (Pensyarah)</label>
+                <textarea id="modal_cadangan_${idx}" style="width:100%;margin-top:3px;padding:7px;border:1.5px solid #f0c060;border-radius:4px;font-size:13px;font-family:inherit;resize:vertical;min-height:60px;background:#fffbf0;" placeholder="Isi cadangan penambahbaikan...">${pt.cadangan||''}</textarea>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+  } else {
+    ptHTML = '<p style="color:#888;text-align:center;padding:20px;">Tiada rekod pertemuan.</p>';
+  }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'modal-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;';
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:12px;width:100%;max-width:700px;overflow:hidden;margin:auto;">
+      <div style="background:linear-gradient(135deg,#1a3a6b,#2e6da4);color:white;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:16px;font-weight:bold;">✏️ Semakan & Kelulusan Log</div>
+          <div style="font-size:12px;opacity:0.8;margin-top:2px;">Pelajar: ${namaPelajar}</div>
+        </div>
+        <button onclick="document.getElementById('modal-overlay').remove()" style="background:rgba(255,255,255,0.2);border:none;color:white;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:13px;">✕ Tutup</button>
+      </div>
+      <div style="padding:20px;">
+        ${ptHTML}
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+          <button onclick="simpanSemakanLulus('${rekodId}',${pertemuan.length},'lulus')" class="btn btn-green">✅ Simpan & Luluskan</button>
+          <button onclick="simpanSemakanLulus('${rekodId}',${pertemuan.length},'simpan')" class="btn btn-blue">💾 Simpan Sahaja</button>
+          <button onclick="document.getElementById('modal-overlay').remove()" class="btn btn-grey">Batal</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function simpanSemakanLulus(rekodId, bilPt, tindakan) {
+  const pertemuanKemaskini = [];
+  for(let i=0; i<bilPt; i++){
+    pertemuanKemaskini.push({
+      maklum:   document.getElementById(`modal_maklum_${i}`)?.value   || '',
+      cadangan: document.getElementById(`modal_cadangan_${i}`)?.value || ''
+    });
+  }
+  try {
+    const result = await apiCall({
+      action: 'semakanPensyarah',
+      rekodId,
+      pertemuanKemaskini,
+      lulus: tindakan === 'lulus'
+    });
+    if (result.status === 'ok') {
+      alert('✅ ' + result.mesej);
+      document.getElementById('modal-overlay')?.remove();
+      loadRekodPensyarah();
+    } else {
+      alert('❌ ' + result.mesej);
+    }
+  } catch(e) {
+    alert('❌ Gagal simpan semakan.');
+  }
+}
+
+// ══════════════════════════
+// EXPORT EXCEL — PELAJAR
+// ══════════════════════════
+function exportExcelPelajar() {
+  const wb = XLSX.utils.book_new();
+  const info = [
+    ["eLOG PERJUMPAAN PELAJAR"],[], 
+    ["MAKLUMAT PENSYARAH"],
+    ["Nama Pensyarah", document.getElementById('nama_pensyarah').value||'-'],
+    ["Program / Aktiviti", document.getElementById('program_aktiviti').value||'-'],
+    ["Tahun", document.getElementById('tahun').value||'-'],
+    ["Sesi Pengajian", document.getElementById('sesi').value||'-'],
+    [],["MAKLUMAT PELAJAR"],
+    ["Nama Pelajar", document.getElementById('nama_pelajar').value||'-'],
+    ["No. Matrik", document.getElementById('no_matrik').value||'-'],
+    ["Program", document.getElementById('program_pelajar').value||'-'],
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(info), "Maklumat");
+  const rekod = [["Bil","Tarikh","Masa","Catatan","Maklumbalas","Cadangan"]];
+  for(let i=1;i<=ptCount;i++){
+    rekod.push([i,
+      document.getElementById(`pt_tarikh_${i}`)?.value||'-',
+      document.getElementById(`pt_masa_${i}`)?.value||'-',
+      document.getElementById(`pt_catatan_${i}`)?.value||'-',
+      document.getElementById(`pt_maklum_${i}`)?.value||'-',
+      document.getElementById(`pt_cadangan_${i}`)?.value||'-',
+    ]);
+  }
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rekod), "Rekod Pertemuan");
+  const lk = [["Bil","Perkara","Skor"]];
+  likertItems.forEach((_item,i)=>{
+    const s = document.querySelector(`input[name="lk_${i}"]:checked`);
+    lk.push([i+1, _item, s?s.value:'-']);
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(lk), "Maklumbalas");
+  XLSX.writeFile(wb, 'eLog-Perjumpaan-Pelajar.xlsx');
+}
+
+// ══════════════════════════
+// EXPORT EXCEL — PENSYARAH
+// ══════════════════════════
+function exportExcelPensyarah() {
+  const all = JSON.parse(localStorage.getItem('elog_data') || '[]');
+  const wb  = XLSX.utils.book_new();
+  const rows = [["Bil","Tarikh Hantar","Pelajar","Pensyarah","Program","Bil. Pertemuan","Status"]];
+  all.forEach((r,i) => rows.push([
+    i+1, r.tarikh_submit, r.pelajar, r.pensyarah||'-',
+    r.program||'-', r.pertemuan.length,
+    r.status==='approved'?'Disahkan':'Menunggu'
+  ]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Semua Rekod");
+  XLSX.writeFile(wb, 'eLog-Semua-Rekod.xlsx');
+}
+
+// ══════════════════════════
+// EXPORT WORD — PENSYARAH
+// ══════════════════════════
+async function exportWordPensyarah() {
+  let semuaRekod = [];
+  try {
+    const result = await apiCall({ action: 'semuaRekod' });
+    semuaRekod = result.rekod || [];
+  } catch(e) {
+    alert('❌ Gagal muatkan rekod dari Google Sheets.');
+    return;
+  }
+
+  let rekodRows = '';
+  semuaRekod.forEach((r, i) => {
+    const statusLabel = r.status === 'Disahkan' ? 'Disahkan' : 'Menunggu';
+    rekodRows += `<tr>
+      <td>${i+1}</td>
+      <td>${r.tarikhHantar||'-'}</td>
+      <td>${r.nama_pelajar||r.pelajarId||'-'}</td>
+      <td>${r.pensyarah||'-'}</td>
+      <td>${r.bilPertemuan||0}</td>
+      <td>${statusLabel}</td>
+    </tr>`;
+  });
+
+  const html = `<html><head><meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12pt; margin: 2cm; }
+    h1 { text-align:center; color:#1a3a6b; }
+    h2 { color:#1a3a6b; border-bottom:1px solid #1a3a6b; margin-top:20px; }
+    table { width:100%; border-collapse:collapse; margin-top:10px; }
+    th { background:#1a3a6b; color:white; padding:8px; text-align:left; }
+    td { border:1px solid #ccc; padding:8px; }
+    tr:nth-child(even) td { background:#f7f9fc; }
+  </style>
+  </head><body>
+  <h1>eLOG PERJUMPAAN PELAJAR — LAPORAN PENSYARAH</h1>
+  <p style="text-align:center;color:#888;">Tarikh Jana: ${new Date().toLocaleDateString('ms-MY')}</p>
+  <h2>Senarai Semua Log Perjumpaan</h2>
+  <table>
+    <thead><tr>
+      <th>#</th><th>Tarikh Hantar</th><th>Pelajar</th><th>Pensyarah</th><th>Bil. Pertemuan</th><th>Status</th>
+    </tr></thead>
+    <tbody>${rekodRows}</tbody>
+  </table>
+  </body></html>`;
+
+  const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'Laporan-eLog-Pensyarah.doc'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════
+// JANA LAPORAN MAKLUMBALAS
+// ══════════════════════════
+function janaLaporanMaklumbalas() {
+  // Kumpul skor
+  const skor = [];
+  const label = [
+    'Pengetahuan',
+    'Pengalaman',
+    'Interaksi',
+    'Penyampaian',
+    'Ambil Berat',
+    'Keterbukaan'
+  ];
+  let adaKosong = false;
+  likertItems.forEach((_,i) => {
+    const sel = document.querySelector(`input[name="lk_${i}"]:checked`);
+    if (!sel) adaKosong = true;
+    skor.push(sel ? parseInt(sel.value) : 0);
+  });
+
+  if (adaKosong) {
+    alert('⚠️ Sila lengkapkan semua soalan maklumbalas dahulu.');
+    return;
+  }
+
+  const jumlah   = skor.reduce((a,b) => a+b, 0);
+  const purata   = (jumlah / skor.length).toFixed(2);
+  const peratus  = ((jumlah / (skor.length * 5)) * 100).toFixed(1);
+  const warnaPurata = purata >= 4.5 ? '#27ae60' : purata >= 3.5 ? '#2e6da4' : purata >= 2.5 ? '#e67e22' : '#e74c3c';
+
+  const tahap = purata >= 4.5 ? 'Sangat Memuaskan ⭐⭐⭐⭐⭐'
+              : purata >= 3.5 ? 'Memuaskan ⭐⭐⭐⭐'
+              : purata >= 2.5 ? 'Sederhana ⭐⭐⭐'
+              : purata >= 1.5 ? 'Tidak Memuaskan ⭐⭐'
+              : 'Sangat Tidak Memuaskan ⭐';
+
+  // ── Skor Overall ──
+  document.getElementById('laporan-skor-overall').innerHTML = `
+    <div style="display:flex; gap:16px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:140px; background:white; border-radius:10px; padding:16px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07); border-top:4px solid ${warnaPurata};">
+        <div style="font-size:32px; font-weight:bold; color:${warnaPurata};">${purata}</div>
+        <div style="font-size:12px; color:#888; margin-top:4px;">Purata Skor (/ 5.00)</div>
+      </div>
+      <div style="flex:1; min-width:140px; background:white; border-radius:10px; padding:16px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07); border-top:4px solid ${warnaPurata};">
+        <div style="font-size:32px; font-weight:bold; color:${warnaPurata};">${peratus}%</div>
+        <div style="font-size:12px; color:#888; margin-top:4px;">Peratusan Keseluruhan</div>
+      </div>
+      <div style="flex:2; min-width:180px; background:white; border-radius:10px; padding:16px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07); border-top:4px solid ${warnaPurata};">
+        <div style="font-size:18px; font-weight:bold; color:${warnaPurata}; margin-top:4px;">${tahap}</div>
+        <div style="font-size:12px; color:#888; margin-top:4px;">Tahap Keseluruhan</div>
+      </div>
+    </div>`;
+
+  // ── Bar Chart SVG ──
+  const barW = 52, gap = 20, padL = 20, padT = 30, padB = 44, chartH = 230, maxH = 140;
+  const totalW = padL + skor.length * (barW + gap) + gap;
+  const colors = ['#3b82d4','#27ae60','#e67e22','#9b59b6','#e74c3c','#1abc9c'];
+
+  let bars = '';
+  skor.forEach((s, i) => {
+    const bh  = (s / 5) * maxH;
+    const x   = padL + gap + i * (barW + gap);
+    const y   = padT + (maxH - bh);           // top of bar
+    const col = colors[i % colors.length];
+    const lbl = label[i];
+    bars += `
+      <rect x="${x}" y="${y}" width="${barW}" height="${bh}" rx="5" fill="${col}" opacity="0.88"/>
+      <rect x="${x}" y="${y - 22}" width="${barW}" height="20" rx="4" fill="${col}"/>
+      <text x="${x + barW/2}" y="${y - 8}" text-anchor="middle" font-size="13" font-weight="bold" fill="white">${s}/5</text>
+      <text x="${x + barW/2}" y="${padT + maxH + 16}" text-anchor="middle" font-size="10" fill="#444">${lbl}</text>`;
+  });
+
+  // Grid lines
+  let grid = '';
+  [1,2,3,4,5].forEach(v => {
+    const gy = padT + maxH - (v/5)*maxH;
+    grid += `<line x1="${padL}" y1="${gy}" x2="${totalW}" y2="${gy}" stroke="#e8eaf0" stroke-width="1" stroke-dasharray="4,3"/>
+             <text x="${padL - 4}" y="${gy + 4}" text-anchor="end" font-size="10" fill="#aaa">${v}</text>`;
+  });
+
+  document.getElementById('laporan-chart').innerHTML = `
+    <svg width="100%" viewBox="0 0 ${totalW} ${chartH}" style="max-width:620px;display:block;margin:auto;">
+      ${grid}${bars}
+      <line x1="${padL}" y1="${padT + maxH}" x2="${totalW}" y2="${padT + maxH}" stroke="#bbb" stroke-width="1.5"/>
+    </svg>`;
+
+  // ── Tafsiran ──
+  const skorMin  = Math.min(...skor);
+  const iMin     = skor.indexOf(skorMin);
+  const skorMax  = Math.max(...skor);
+  const iMax     = skor.indexOf(skorMax);
+  const itemPendek = ['Pengetahuan', 'Pengalaman', 'Interaksi', 'Penyampaian', 'Ambil Berat Program', 'Keterbukaan'];
+
+  document.getElementById('laporan-tafsiran').innerHTML = `
+    <strong>📋 Tafsiran:</strong><br>
+    • Skor tertinggi: <strong>${itemPendek[iMax]}</strong> (${skorMax}/5) — aspek terbaik pensyarah pembimbing.<br>
+    • Skor terendah: <strong>${itemPendek[iMin]}</strong> (${skorMin}/5) — aspek yang boleh ditambahbaik.<br>
+    • Purata keseluruhan <strong>${purata}/5.00</strong> menunjukkan tahap bimbingan adalah <strong style="color:${warnaPurata};">${tahap.split(' ')[0]} ${tahap.split(' ')[1]||''}</strong>.`;
+
+  document.getElementById('laporan-maklumbalas').style.display = 'block';
+  document.getElementById('laporan-maklumbalas').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function exportWord() {
+  let pt = '';
+  for(let i=1;i<=ptCount;i++){
+    pt += `<h3>Pertemuan ke-${i}</h3>
+    <table border="1" cellpadding="6" style="width:100%;border-collapse:collapse;">
+      <tr><td><b>Tarikh</b></td><td>${document.getElementById(`pt_tarikh_${i}`)?.value||'-'}</td></tr>
+      <tr><td><b>Masa</b></td><td>${document.getElementById(`pt_masa_${i}`)?.value||'-'}</td></tr>
+      <tr><td><b>Catatan</b></td><td>${document.getElementById(`pt_catatan_${i}`)?.value||'-'}</td></tr>
+      <tr><td><b>Maklumbalas</b></td><td>${document.getElementById(`pt_maklum_${i}`)?.value||'-'}</td></tr>
+      <tr><td><b>Cadangan</b></td><td>${document.getElementById(`pt_cadangan_${i}`)?.value||'-'}</td></tr>
+    </table>`;
+  }
+  const html = `<html><head><meta charset="UTF-8">
+  <style>body{font-family:Arial;font-size:12pt;margin:2cm;}h1{color:#1a3a6b;text-align:center;}h2{color:#1a3a6b;}table{width:100%;border-collapse:collapse;margin-bottom:12px;}td,th{border:1px solid #333;padding:8px;}th{background:#1a3a6b;color:white;}</style>
+  </head><body>
+  <h1>eLOG PERJUMPAAN PELAJAR</h1>
+  <h2>Maklumat Pensyarah</h2>
+  <table>
+    <tr><td><b>Nama Pensyarah</b></td><td>${document.getElementById('nama_pensyarah').value||'-'}</td></tr>
+    <tr><td><b>Program</b></td><td>${document.getElementById('program_aktiviti').value||'-'}</td></tr>
+    <tr><td><b>Tahun</b></td><td>${document.getElementById('tahun').value||'-'}</td></tr>
+    <tr><td><b>Sesi</b></td><td>${document.getElementById('sesi').value||'-'}</td></tr>
+  </table>
+  <h2>Maklumat Pelajar</h2>
+  <table>
+    <tr><td><b>Nama Pelajar</b></td><td>${document.getElementById('nama_pelajar').value||'-'}</td></tr>
+    <tr><td><b>No. Matrik</b></td><td>${document.getElementById('no_matrik').value||'-'}</td></tr>
+    <tr><td><b>Program</b></td><td>${document.getElementById('program_pelajar').value||'-'}</td></tr>
+  </table>
+  <h2>Rekod Pertemuan</h2>${pt}
+  </body></html>`;
+  const blob = new Blob(['\ufeff',html],{type:'application/msword'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download='eLog-Perjumpaan-Pelajar.doc'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════
+// IMPAK BIMBINGAN — SIMPAN & LOAD
+// ══════════════════════════
+async function simpanImpak() {
+  const gambarEl = document.getElementById('kejayaan_prev').querySelector('img');
+  const payload = {
+    action:       'simpanImpak',
+    pensyarahId:  currentUser,
+    pertandingan: document.getElementById('nama_pertandingan').value.trim(),
+    tarikh:       document.getElementById('tarikh_pertandingan').value,
+    kejayaan:     document.getElementById('kejayaan').value.trim(),
+    gambar:       gambarEl ? gambarEl.src : ''
+  };
+  if (!payload.pertandingan && !payload.kejayaan) {
+    alert('⚠️ Sila isi sekurang-kurangnya nama pertandingan atau pencapaian.');
+    return;
+  }
+  try {
+    const result = await apiCall(payload);
+    if (result.status === 'ok') {
+      alert('✅ Impak bimbingan berjaya disimpan!');
+      loadImpak();
+    } else {
+      alert('❌ ' + result.mesej);
+    }
+  } catch(e) {
+    alert('❌ Gagal sambung ke pelayan.');
+  }
+}
+
+async function loadImpak() {
+  try {
+    const result = await apiCall({ action: 'getImpak', pensyarahId: currentUser });
+    if (result.status === 'ok' && result.impak) {
+      const imp = result.impak;
+      document.getElementById('nama_pertandingan').value  = imp.pertandingan || '';
+      document.getElementById('tarikh_pertandingan').value = imp.tarikh      || '';
+      document.getElementById('kejayaan').value           = imp.kejayaan     || '';
+      if (imp.gambar) {
+        document.getElementById('kejayaan_prev').innerHTML =
+          `<img src="${imp.gambar}" style="width:100%;height:100%;object-fit:cover;">`;
+      }
+      // Papar dalam dashboard
+      const statEl = document.getElementById('stat-kejayaan');
+      if (imp.pertandingan) {
+        statEl.textContent = imp.pertandingan;
+        statEl.style.fontSize = '13px';
+      }
+    }
+  } catch(e) {}
+}
+
+// ══════════════════════════
+// RESET FORM
+// ══════════════════════════
+function resetFormPertemuan() {
+  document.querySelectorAll('#tab-pertemuan input[type=text],#tab-pertemuan input[type=date],#tab-pertemuan input[type=time],#tab-pertemuan textarea').forEach(e=>e.value='');
+  document.querySelectorAll('#tab-pertemuan input[type=radio]').forEach(e=>e.checked=false);
+  document.getElementById('pertemuan_list').innerHTML='';
+  document.getElementById('pilih_aktiviti').value = '';
+  ptCount=0; tambahPertemuan();
+}
+
+function resetForm() {
+  if(!confirm("Set semula rekod pertemuan?")) return;
+  resetFormPertemuan();
+}
+</script>
+</body>
+</html>
